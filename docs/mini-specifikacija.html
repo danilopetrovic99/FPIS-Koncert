@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Specifikacija – KoncertApp</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 50px;
+      color: #1a1a2e;
+      line-height: 1.7;
+      background: #fff;
+    }
+    /* Title page */
+    .title-page {
+      text-align: center;
+      padding: 60px 0 80px 0;
+      border-bottom: 3px solid #0f3460;
+      margin-bottom: 50px;
+    }
+    .title-page h1 {
+      font-size: 2.2rem;
+      color: #0f3460;
+      margin-bottom: 12px;
+    }
+    .title-page h2 {
+      font-size: 1.3rem;
+      color: #e94560;
+      font-weight: 600;
+      margin-bottom: 30px;
+      border: none;
+    }
+    .title-page .subtitle {
+      font-size: 1rem;
+      color: #555;
+      margin-top: 20px;
+    }
+    /* Headings */
+    h2 {
+      font-size: 1.5rem;
+      color: #0f3460;
+      border-bottom: 2px solid #0f3460;
+      padding-bottom: 8px;
+      margin-top: 60px;
+      margin-bottom: 20px;
+    }
+    h3 {
+      font-size: 1.15rem;
+      color: #16213e;
+      margin-top: 30px;
+      margin-bottom: 12px;
+    }
+    p { margin-bottom: 14px; }
+    /* ToC */
+    .toc {
+      background: #f4f6fb;
+      border: 1px solid #d0d8e8;
+      border-radius: 8px;
+      padding: 24px 32px;
+      margin: 0 0 50px 0;
+    }
+    .toc h3 { color: #0f3460; margin-bottom: 14px; margin-top: 0; }
+    .toc ol { padding-left: 22px; }
+    .toc li { padding: 4px 0; }
+    .toc a { color: #0f3460; text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    /* Diagram wrapper */
+    .diagram {
+      background: #fafbfd;
+      border: 1px solid #dce3f0;
+      border-radius: 8px;
+      padding: 24px 20px;
+      margin: 20px 0 30px 0;
+      overflow-x: auto;
+      text-align: center;
+    }
+    /* Tables */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 18px 0 30px 0;
+      font-size: 0.93rem;
+    }
+    th {
+      background: #0f3460;
+      color: #fff;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+    }
+    td { padding: 9px 14px; border: 1px solid #d0d8e8; vertical-align: top; }
+    tr:nth-child(even) td { background: #f4f6fb; }
+    /* Note/info boxes */
+    .note {
+      background: #fff8e1;
+      border-left: 4px solid #ffc107;
+      padding: 12px 18px;
+      border-radius: 0 6px 6px 0;
+      margin: 18px 0;
+      font-size: 0.93rem;
+    }
+    .info {
+      background: #e8f4fd;
+      border-left: 4px solid #2196f3;
+      padding: 12px 18px;
+      border-radius: 0 6px 6px 0;
+      margin: 18px 0;
+      font-size: 0.93rem;
+    }
+    code {
+      background: #eef1f7;
+      padding: 2px 7px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-right: 4px;
+    }
+    .badge-pk { background: #fde8d8; color: #c0440c; }
+    .badge-fk { background: #d8eafd; color: #0c44c0; }
+    .badge-uk { background: #d8fdea; color: #0c6c3c; }
+    /* Print */
+    @media print {
+      body { max-width: 100%; padding: 20px; }
+      h2 { page-break-before: always; }
+      .diagram { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NASLOVNICA -->
+  <div class="title-page">
+    <h1>Mini Specifikacija</h1>
+    <h2>KoncertApp – Eros Ramazzotti Battito Infinito World Tour</h2>
+    <p style="color:#555; font-size:1rem;">Projektni zadatak – FPIS / MAS</p>
+    <p style="color:#888; font-size:0.9rem; margin-top:12px;">
+      Stack: React + TypeScript &nbsp;|&nbsp; ASP.NET Core (.NET 8) &nbsp;|&nbsp; PostgreSQL
+    </p>
+    <p class="subtitle" style="margin-top:30px;">Beograd, April 2026.</p>
+  </div>
+
+  <!-- SADRŽAJ -->
+  <div class="toc">
+    <h3>Sadržaj</h3>
+    <ol>
+      <li><a href="#s1">Softverski zahtevi – Dijagram slučajeva korišćenja (Use Case)</a></li>
+      <li><a href="#s2">Logički model podataka – PMOV</a></li>
+      <li><a href="#s3">Fizički model podataka – IDEF1X</a></li>
+      <li><a href="#s4">Feature 2: Rezervacija karata – UML Dijagram sekvenci</a></li>
+      <li><a href="#s5">Feature 2: Rezervacija karata – Dijagram klasa</a></li>
+      <li><a href="#s6">Konačni dijagram klasa (cela aplikacija)</a></li>
+      <li><a href="#s7">Dijagrami prelaza stanja (STD)</a></li>
+    </ol>
+  </div>
+
+  <!-- =====================================================================
+       SEKCIJA 1 – USE CASE
+       ===================================================================== -->
+  <h2 id="s1">1. Softverski zahtevi – Dijagram slučajeva korišćenja</h2>
+
+  <p>
+    Aplikacija KoncertApp pruža četiri glavna slučaja korišćenja grupisana u dva Feature-a koji
+    su implementirani na frontendu i backendu. Identifikovani su sledeći akteri:
+  </p>
+  <ul style="margin: 10px 0 18px 22px; line-height: 2;">
+    <li><strong>Posetilac</strong> – anoniman korisnik koji pristupa javnom delu aplikacije.</li>
+    <li><strong>Kupac</strong> – korisnik koji je izvršio rezervaciju i poseduje email + token.</li>
+  </ul>
+
+  <div class="diagram">
+    <pre class="mermaid">
+graph LR
+    A1["👤 Posetilac"]
+    A2["👤 Kupac\n(email + token)"]
+
+    subgraph SYS["  KoncertApp Sistem  "]
+        direction TB
+        UC1(["UC1: Pregled informacija o koncertu"])
+        UC2(["UC2: Rezervacija karata"])
+        UC3(["UC3: Pregled i izmena rezervacije"])
+        UC4(["UC4: Otkazivanje rezervacije"])
+        UC2a(["«sub» Obračun cene"])
+        UC2b(["«sub» Primena promo koda"])
+        UC2c(["«sub» Generisanje tokena"])
+        UC2d(["«sub» Generisanje promo koda"])
+    end
+
+    A1 --> UC1
+    A1 --> UC2
+    A2 --> UC3
+    A2 --> UC4
+
+    UC2 -- "«include»" --> UC2a
+    UC2 -- "«include»" --> UC2c
+    UC2 -- "«include»" --> UC2d
+    UC2 -- "«extend»" --> UC2b
+    UC3 -- "«include»" --> UC2a
+
+    style A1 fill:#dbe9f7,stroke:#0f3460,color:#0f3460
+    style A2 fill:#dbe9f7,stroke:#0f3460,color:#0f3460
+    style UC1 fill:#fff,stroke:#0f3460
+    style UC2 fill:#fff,stroke:#0f3460
+    style UC3 fill:#fff,stroke:#0f3460
+    style UC4 fill:#fff,stroke:#e94560
+    style UC2a fill:#f0f0f0,stroke:#888
+    style UC2b fill:#f0f0f0,stroke:#888
+    style UC2c fill:#f0f0f0,stroke:#888
+    style UC2d fill:#f0f0f0,stroke:#888
+    </pre>
+  </div>
+
+  <h3>1.1 Opisi slučajeva korišćenja</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:10%">ID</th>
+        <th style="width:22%">Naziv</th>
+        <th style="width:18%">Akteri</th>
+        <th>Opis i tok</th>
+        <th style="width:18%">Preduslovi / Alternativni tok</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>UC1</strong></td>
+        <td>Pregled informacija o koncertu</td>
+        <td>Posetilac</td>
+        <td>
+          Korisnik otvara početnu stranicu aplikacije. Sistem prikazuje naziv,
+          datum, lokaciju i grad, dostupne zone sa kapacitetom i cenom po karti,
+          rok early bird i opcionalne dodatne informacije.
+        </td>
+        <td>Nema preduslova. Nema alternativnog toka.</td>
+      </tr>
+      <tr>
+        <td><strong>UC2</strong></td>
+        <td>Rezervacija karata</td>
+        <td>Posetilac</td>
+        <td>
+          1. Korisnik odabira zonu i broj karata.<br>
+          2. Unosi lične podatke (ime, prezime, kompanija*, adresa, email).<br>
+          3. Opciono unosi promo kod.<br>
+          4. Sistem validira kapacitet zone i promo kod (ako postoji).<br>
+          5. Sistem obračunava ukupnu cenu (early bird → 5. karta po zoni → promo).<br>
+          6. Sistem kreira rezervaciju, generiše jedinstveni token i promo kod za ovu rezervaciju.<br>
+          7. Korisnik dobija potvrdu sa tokenom i promo kodom.
+        </td>
+        <td>
+          <strong>Pre:</strong> Slobodna mesta u zoni.<br><br>
+          <strong>Alt 1:</strong> Nema slobodnih mesta → greška 400.<br>
+          <strong>Alt 2:</strong> Nevalidan/iskorišćen promo kod → greška 400.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>UC3</strong></td>
+        <td>Pregled i izmena rezervacije</td>
+        <td>Kupac</td>
+        <td>
+          1. Kupac unosi email i token na stranici „Moja rezervacija".<br>
+          2. Sistem prikazuje detalje rezervacije.<br>
+          3. Kupac može dodati ili ukloniti karte (uz ograničenje dostupnim mestima).<br>
+          4. Sistem ponovo obračunava cenu sa istim pravilima popusta.<br>
+          5. Sistem ažurira rezervaciju i prikazuje novu ukupnu cenu.
+        </td>
+        <td>
+          <strong>Pre:</strong> Rezervacija u statusu Active.<br><br>
+          <strong>Alt 1:</strong> Nevalidan email/token → 401.<br>
+          <strong>Alt 2:</strong> Nema slobodnih mesta pri dodavanju → 400.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>UC4</strong></td>
+        <td>Otkazivanje rezervacije</td>
+        <td>Kupac</td>
+        <td>
+          1. Kupac unosi email i token i potvrđuje otkazivanje.<br>
+          2. Sistem postavlja status rezervacije na Cancelled.<br>
+          3. Token postaje trajno neaktivan (više se ne može koristiti za pristup).<br>
+          4. Promo kod koji je ova rezervacija generisala (ako nije iskorišćen) dobija status Cancelled.<br>
+          5. Ako je promo kod ove rezervacije već bio iskorišćen od strane druge rezervacije, on ostaje Used, ali se efekt (−5%) ne poništava na drugoj rezervaciji.
+        </td>
+        <td>
+          <strong>Pre:</strong> Rezervacija u statusu Active, validan email + token.<br><br>
+          <strong>Alt 1:</strong> Rezervacija već otkazana → 400.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>1.2 Pravila obračuna cene (Feature 2 i Feature 3)</h3>
+  <table>
+    <thead>
+      <tr><th style="width:30%">Popust</th><th>Uslov</th><th>Iznos</th><th>Redosled primene</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Early Bird</td>
+        <td>Datum rezervacije ≤ EarlyBirdDeadline</td>
+        <td>−10% na baznu cenu karte</td>
+        <td>1. (primenjuje se na baznu cenu)</td>
+      </tr>
+      <tr>
+        <td>Svaka 5. karta u zoni</td>
+        <td>Karte na poziciji 5, 10, 15... u okviru jedne rezervacije u istoj zoni</td>
+        <td>−50% na već umanjenu cenu (kumulativno s early bird)</td>
+        <td>2. (primenjuje se na cenu posle early bird)</td>
+      </tr>
+      <tr>
+        <td>Promo kod</td>
+        <td>Validan promo kod koji korisnik unese</td>
+        <td>−5% na ukupan zbir svih karata</td>
+        <td>3. (primenjuje se na ukupan zbir posle oba prethodna popusta)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- =====================================================================
+       SEKCIJA 2 – PMOV
+       ===================================================================== -->
+  <h2 id="s2">2. Logički model podataka – PMOV</h2>
+
+  <p>
+    Logički model sadrži četiri entiteta koji opisuju domenu rezervacije karata za koncert.
+    Model je normalizovan do 3NF. Podaci kupca su denormalizovani i smešteni direktno u
+    entitetu Rezervacija jer jedan kupac može imati više rezervacija pod različitim imenima
+    (porodica, prijatelji), pa se ne izdvaja kao zasebni entitet.
+  </p>
+
+  <div class="diagram">
+    <pre class="mermaid">
+classDiagram
+    direction LR
+
+    class Concert {
+        +int Id
+        +string Name
+        +string City
+        +string Location
+        +string ConcertDates
+        +string AdditionalInfo
+        +DateTime EarlyBirdDeadline
+    }
+
+    class Zone {
+        +int Id
+        +int ConcertId
+        +string Name
+        +int Capacity
+        +decimal PricePerTicket
+    }
+
+    class Reservation {
+        +int Id
+        +int ZoneId
+        +ReservationStatus Status
+        +string Token
+        +int TicketCount
+        +decimal TotalPrice
+        +bool IsEarlyBird
+        +DateTime CreatedAt
+        +string FirstName
+        +string LastName
+        +string Company
+        +string Address1
+        +string Address2
+        +string PostalCode
+        +string City
+        +string Country
+        +string Email
+        +int UsedPromoCodeId
+    }
+
+    class PromoCode {
+        +int Id
+        +string Code
+        +PromoCodeStatus Status
+        +int OwnerReservationId
+        +int UsedByReservationId
+    }
+
+    class ReservationStatus {
+        <<enumeration>>
+        Active
+        Cancelled
+    }
+
+    class PromoCodeStatus {
+        <<enumeration>>
+        Active
+        Used
+        Cancelled
+    }
+
+    Concert "1" --> "0..*" Zone : sadrzi
+    Zone "1" --> "0..*" Reservation : ima
+    Reservation "1" --> "0..1" PromoCode : generise
+    PromoCode "0..1" --> "0..1" Reservation : koristi
+    Reservation --> ReservationStatus
+    PromoCode --> PromoCodeStatus
+    </pre>
+  </div>
+
+  <h3>2.1 Opis entiteta</h3>
+
+  <table>
+    <thead>
+      <tr><th>Entitet</th><th>Opis</th><th>Ključni atributi</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Concert</strong></td>
+        <td>Podaci o koncertu (jedan u sistemu). Sadrži rok early bird koji se koristi pri obračunu cene.</td>
+        <td>Id (PK), EarlyBirdDeadline</td>
+      </tr>
+      <tr>
+        <td><strong>Zone</strong></td>
+        <td>Zona u okviru koncertnog prostora (VIP, Parter, Balkon itd.). Svaka zona ima sopstveni kapacitet i cenu po karti. Slobodna mesta se ne čuvaju kao atribut – računaju se dinamički kao <code>Capacity - SUM(TicketCount)</code> aktivnih rezervacija (zaštita od race conditiona).</td>
+        <td>Id (PK), ConcertId (FK)</td>
+      </tr>
+      <tr>
+        <td><strong>Reservation</strong></td>
+        <td>Rezervacija u okviru jedne zone. Sadrži sve podatke o kupcu, broj karata, obračunatu ukupnu cenu, token za autentifikaciju i zastavicu da li je primenjen early bird. Jedna rezervacija generiše tačno jedan promo kod i može koristiti tačno jedan promo kod drugog kupca.</td>
+        <td>Id (PK), ZoneId (FK), Token (UK), UsedPromoCodeId (FK?)</td>
+      </tr>
+      <tr>
+        <td><strong>PromoCode</strong></td>
+        <td>Promo kod koji se generiše za svaku rezervaciju i može biti prosleđen prijatelju. Prati ko je vlasnik koda i koja rezervacija ga je iskoristila. Kod postaje nevalidan kada vlasnik otkaže rezervaciju.</td>
+        <td>Id (PK), Code (UK), OwnerReservationId (FK, UK), UsedByReservationId (FK?)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- =====================================================================
+       SEKCIJA 3 – IDEF1X
+       ===================================================================== -->
+  <h2 id="s3">3. Fizički model podataka – IDEF1X</h2>
+
+  <p>
+    Fizički model prikazuje tabele, tipove podataka, primarne ključeve (PK), spoljne ključeve (FK)
+    i jedinstvena ograničenja (UK) onako kako su definisani u PostgreSQL bazi podataka.
+    Model je generisan kroz EF Core migracije (<code>Npgsql.EntityFrameworkCore.PostgreSQL 8.x</code>).
+  </p>
+
+  <div class="diagram">
+    <pre class="mermaid">
+erDiagram
+    Concerts {
+        serial Id PK
+        text Name
+        text City
+        text Location
+        text ConcertDates
+        text AdditionalInfo "nullable"
+        timestamptz EarlyBirdDeadline
+    }
+
+    Zones {
+        serial Id PK
+        integer ConcertId FK
+        text Name
+        integer Capacity
+        numeric_10_2 PricePerTicket
+    }
+
+    Reservations {
+        serial Id PK
+        integer ZoneId FK
+        text Status "Active|Cancelled"
+        text Token UK
+        integer TicketCount
+        numeric_10_2 TotalPrice
+        boolean IsEarlyBird
+        timestamptz CreatedAt
+        text FirstName
+        text LastName
+        text Company "nullable"
+        text Address1
+        text Address2 "nullable"
+        text PostalCode
+        text City
+        text Country
+        text Email
+        integer UsedPromoCodeId "FK nullable"
+    }
+
+    PromoCodes {
+        serial Id PK
+        text Code UK
+        text Status "Active|Used|Cancelled"
+        integer OwnerReservationId "FK UK"
+        integer UsedByReservationId "FK nullable UK"
+    }
+
+    Concerts ||--|{ Zones : "ConcertId"
+    Zones ||--o{ Reservations : "ZoneId"
+    Reservations ||--o| PromoCodes : "OwnerReservationId (generiše)"
+    PromoCodes |o--o| Reservations : "UsedByReservationId (koristi)"
+    </pre>
+  </div>
+
+  <h3>3.1 Ograničenja i napomene</h3>
+  <table>
+    <thead>
+      <tr><th>Tabela</th><th>Kolona</th><th>Tip ograničenja</th><th>Opis</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Reservations</td><td>Token</td><td><span class="badge badge-uk">UK</span></td><td>Svaka rezervacija ima jedinstven token (UUID format)</td></tr>
+      <tr><td>PromoCodes</td><td>Code</td><td><span class="badge badge-uk">UK</span></td><td>Svaki promo kod je jedinstven string</td></tr>
+      <tr><td>PromoCodes</td><td>OwnerReservationId</td><td><span class="badge badge-uk">UK</span> <span class="badge badge-fk">FK</span></td><td>Jedna rezervacija generiše tačno jedan promo kod (1:1)</td></tr>
+      <tr><td>PromoCodes</td><td>UsedByReservationId</td><td><span class="badge badge-uk">UK</span> <span class="badge badge-fk">FK</span></td><td>Jedan promo kod može biti iskorišćen od strane najviše jedne rezervacije</td></tr>
+      <tr><td>Zones</td><td>ConcertId</td><td><span class="badge badge-fk">FK</span> CASCADE</td><td>Brisanje koncerta briše sve zone (kaskadno)</td></tr>
+      <tr><td>Reservations</td><td>ZoneId</td><td><span class="badge badge-fk">FK</span> RESTRICT</td><td>Ne može se brisati zona dok postoje rezervacije</td></tr>
+      <tr><td>PromoCodes</td><td>OwnerReservationId</td><td><span class="badge badge-fk">FK</span> RESTRICT</td><td>Ne može se brisati rezervacija dok postoji njen promo kod</td></tr>
+      <tr><td>Zone, Reservation</td><td>PricePerTicket, TotalPrice</td><td>NUMERIC(10,2)</td><td>Preciznost 2 decimale, max 99.999.999,99</td></tr>
+      <tr><td>Reservation, PromoCode</td><td>Status</td><td>TEXT + enum konverzija</td><td>EF Core čuva enum kao string (čitljivost u bazi)</td></tr>
+    </tbody>
+  </table>
+
+  <!-- =====================================================================
+       SEKCIJA 4 – DIJAGRAM SEKVENCI (Feature 2)
+       ===================================================================== -->
+  <h2 id="s4">4. Feature 2: Rezervacija karata – UML Dijagram sekvenci</h2>
+
+  <p>
+    Dijagram prikazuje celokupan tok kreiranja rezervacije, uključujući validaciju kapaciteta,
+    opcionalnu validaciju promo koda, obračun cene kroz <code>PricingService</code>, kreiranje
+    rezervacije u transakciji i generisanje promo koda.
+  </p>
+
+  <div class="diagram">
+    <pre class="mermaid">
+sequenceDiagram
+    actor Korisnik
+    participant FE as React Frontend
+    participant CTR as ReservationController
+    participant SVC as ReservationService
+    participant PRC as PricingService
+    participant DB as PostgreSQL
+
+    Korisnik->>FE: Popuni formu (zona, br. karata, podaci kupca, promo?)
+    FE->>CTR: POST /api/reservations (CreateReservationDto)
+    CTR->>SVC: CreateAsync(dto)
+
+    SVC->>DB: SELECT * FROM Zones WHERE Id = dto.ZoneId
+    DB-->>SVC: zona (Capacity, PricePerTicket)
+
+    SVC->>DB: SELECT SUM(TicketCount) FROM Reservations<br/>WHERE ZoneId=dto.ZoneId AND Status='Active'
+    DB-->>SVC: zauzetaMesta
+
+    alt nema dovoljno slobodnih mesta
+        SVC-->>CTR: BadRequest("Nema slobodnih mesta")
+        CTR-->>FE: 400 Bad Request
+        FE-->>Korisnik: Prikaz greške
+    end
+
+    opt Korisnik je uneo promo kod
+        SVC->>DB: SELECT * FROM PromoCodes WHERE Code = dto.PromoCode
+        DB-->>SVC: promoKod (Status, OwnerReservationId)
+        alt promoKod nepostoji ili Status != Active
+            SVC-->>CTR: BadRequest("Nevalidan promo kod")
+            CTR-->>FE: 400 Bad Request
+            FE-->>Korisnik: Prikaz greške
+        end
+    end
+
+    SVC->>DB: SELECT EarlyBirdDeadline FROM Concerts
+    DB-->>SVC: earlyBirdDeadline
+
+    SVC->>PRC: CalculateTotal(PricePerTicket, TicketCount,<br/>isEarlyBird, imaPromoKod)
+    Note over PRC: Korak 1: Early bird → cena * 0.90<br/>Korak 2: Svaka 5. karta → *0.50 od već snižene<br/>Korak 3: Promo → ukupno * 0.95
+    PRC-->>SVC: ukupnaCena
+
+    SVC->>SVC: token = Guid.NewGuid().ToString("N")
+    SVC->>SVC: noviKod = GenerateRandomPromoCode()
+
+    SVC->>DB: BEGIN TRANSACTION
+    SVC->>DB: INSERT INTO Reservations (..., Token=token,<br/>TotalPrice=ukupnaCena, IsEarlyBird=...)
+    DB-->>SVC: reservationId
+
+    SVC->>DB: INSERT INTO PromoCodes (Code=noviKod,<br/>OwnerReservationId=reservationId, Status='Active')
+    DB-->>SVC: promoCodeId
+
+    opt Promo kod je bio iskorišćen
+        SVC->>DB: UPDATE PromoCodes SET Status='Used',<br/>UsedByReservationId=reservationId WHERE Code=dto.PromoCode
+        SVC->>DB: UPDATE Reservations SET UsedPromoCodeId=korisceniPromoId<br/>WHERE Id=reservationId
+    end
+
+    SVC->>DB: COMMIT
+    DB-->>SVC: OK
+
+    SVC-->>CTR: ReservationResponseDto (Id, Token, TotalPrice,<br/>GeneratedPromoCode, ZoneName, TicketCount)
+    CTR-->>FE: 201 Created
+    FE-->>Korisnik: Prikaz potvrde rezervacije + token + promo kod
+    </pre>
+  </div>
+
+  <!-- =====================================================================
+       SEKCIJA 5 – DIJAGRAM KLASA (Feature 2)
+       ===================================================================== -->
+  <h2 id="s5">5. Feature 2: Rezervacija karata – Dijagram klasa</h2>
+
+  <p>
+    Dijagram klasa za Feature 2 prikazuje sve klase koje učestvuju u procesu rezervacije:
+    kontroler, servise, modele i DTO objekte sa atributima i operacijama.
+  </p>
+
+  <div class="diagram">
+    <pre class="mermaid">
+classDiagram
+    direction TB
+
+    class ReservationController {
+        -IReservationService _service
+        +CreateReservation(CreateReservationDto) Task~IActionResult~
+        +GetReservation(string, string) Task~IActionResult~
+        +UpdateReservation(string, UpdateReservationDto) Task~IActionResult~
+        +CancelReservation(CancelReservationDto) Task~IActionResult~
+    }
+
+    class IReservationService {
+        <<interface>>
+        +CreateAsync(CreateReservationDto) Task~ReservationResponseDto~
+        +GetByTokenAsync(string, string) Task~ReservationResponseDto~
+        +UpdateAsync(string, UpdateReservationDto) Task~ReservationResponseDto~
+        +CancelAsync(CancelReservationDto) Task
+    }
+
+    class ReservationService {
+        -AppDbContext _context
+        -IPricingService _pricing
+        +CreateAsync(CreateReservationDto) Task~ReservationResponseDto~
+        +GetByTokenAsync(string, string) Task~ReservationResponseDto~
+        +UpdateAsync(string, UpdateReservationDto) Task~ReservationResponseDto~
+        +CancelAsync(CancelReservationDto) Task
+        -GenerateToken() string
+        -GeneratePromoCode() string
+    }
+
+    class IPricingService {
+        <<interface>>
+        +CalculateTotal(decimal, int, bool, bool) decimal
+    }
+
+    class PricingService {
+        -decimal EARLY_BIRD_DISCOUNT$
+        -decimal FIFTH_TICKET_DISCOUNT$
+        -decimal PROMO_DISCOUNT$
+        +CalculateTotal(decimal, int, bool, bool) decimal
+        -ApplyFifthTicketDiscount(decimal, int) decimal
+    }
+
+    class CreateReservationDto {
+        +int ZoneId
+        +int TicketCount
+        +string FirstName
+        +string LastName
+        +string Company
+        +string Address1
+        +string Address2
+        +string PostalCode
+        +string City
+        +string Country
+        +string Email
+        +string PromoCode
+    }
+
+    class UpdateReservationDto {
+        +int TicketCount
+    }
+
+    class CancelReservationDto {
+        +string Email
+        +string Token
+    }
+
+    class ReservationResponseDto {
+        +int Id
+        +string Token
+        +decimal TotalPrice
+        +bool IsEarlyBird
+        +string GeneratedPromoCode
+        +string ZoneName
+        +int TicketCount
+    }
+
+    class Reservation {
+        +int Id
+        +int ZoneId
+        +ReservationStatus Status
+        +string Token
+        +int TicketCount
+        +decimal TotalPrice
+        +bool IsEarlyBird
+        +DateTime CreatedAt
+        +string FirstName
+        +string LastName
+        +string Email
+        +int UsedPromoCodeId
+        +Zone Zone
+        +PromoCode OwnedPromoCode
+        +PromoCode UsedPromoCode
+    }
+
+    class Zone {
+        +int Id
+        +int ConcertId
+        +string Name
+        +int Capacity
+        +decimal PricePerTicket
+        +Concert Concert
+        +ICollection~Reservation~ Reservations
+    }
+
+    class PromoCode {
+        +int Id
+        +string Code
+        +PromoCodeStatus Status
+        +int OwnerReservationId
+        +int UsedByReservationId
+        +Reservation OwnerReservation
+        +Reservation UsedByReservation
+    }
+
+    class AppDbContext {
+        +DbSet~Concert~ Concerts
+        +DbSet~Zone~ Zones
+        +DbSet~Reservation~ Reservations
+        +DbSet~PromoCode~ PromoCodes
+    }
+
+    ReservationController --> IReservationService : uses
+    IReservationService <|.. ReservationService : implements
+    ReservationService --> IPricingService : uses
+    IPricingService <|.. PricingService : implements
+    ReservationService --> AppDbContext : injects
+    ReservationController ..> CreateReservationDto : receives
+    ReservationController ..> ReservationResponseDto : returns
+    ReservationController ..> UpdateReservationDto : receives
+    ReservationController ..> CancelReservationDto : receives
+    Reservation --> Zone : belongs to
+    Reservation "1" --> "0..1" PromoCode : owns
+    PromoCode "0..1" --> "0..1" Reservation : usedBy
+    </pre>
+  </div>
+
+  <!-- =====================================================================
+       SEKCIJA 6 – KONAČNI DIJAGRAM KLASA
+       ===================================================================== -->
+  <h2 id="s6">6. Konačni dijagram klasa (cela aplikacija)</h2>
+
+  <p>
+    Konačni dijagram klasa obuhvata celu arhitekturu aplikacije: kontrolere, servise (interfejsi
+    i implementacije), modele podataka, DTO objekte i DbContext. Klase su grupisane po sloju.
+  </p>
+
+  <div class="diagram">
+    <pre class="mermaid">
+classDiagram
+    direction TB
+
+    class ConcertController {
+        -IConcertService _service
+        +GetConcertInfo() Task~IActionResult~
+    }
+
+    class ReservationController {
+        -IReservationService _service
+        +CreateReservation(CreateReservationDto) Task~IActionResult~
+        +GetReservation(string, string) Task~IActionResult~
+        +UpdateReservation(string, UpdateReservationDto) Task~IActionResult~
+        +CancelReservation(CancelReservationDto) Task~IActionResult~
+    }
+
+    class IConcertService {
+        <<interface>>
+        +GetConcertInfoAsync() Task~ConcertInfoDto~
+    }
+
+    class IReservationService {
+        <<interface>>
+        +CreateAsync(CreateReservationDto) Task~ReservationResponseDto~
+        +GetByTokenAsync(string, string) Task~ReservationResponseDto~
+        +UpdateAsync(string, UpdateReservationDto) Task~ReservationResponseDto~
+        +CancelAsync(CancelReservationDto) Task
+    }
+
+    class IPricingService {
+        <<interface>>
+        +CalculateTotal(decimal, int, bool, bool) decimal
+    }
+
+    class ConcertService {
+        -AppDbContext _context
+        +GetConcertInfoAsync() Task~ConcertInfoDto~
+    }
+
+    class ReservationService {
+        -AppDbContext _context
+        -IPricingService _pricing
+        +CreateAsync(CreateReservationDto) Task~ReservationResponseDto~
+        +GetByTokenAsync(string, string) Task~ReservationResponseDto~
+        +UpdateAsync(string, UpdateReservationDto) Task~ReservationResponseDto~
+        +CancelAsync(CancelReservationDto) Task
+        -GenerateToken() string
+        -GeneratePromoCode() string
+    }
+
+    class PricingService {
+        -decimal EARLY_BIRD_DISCOUNT$
+        -decimal FIFTH_TICKET_DISCOUNT$
+        -decimal PROMO_DISCOUNT$
+        +CalculateTotal(decimal, int, bool, bool) decimal
+        -ApplyFifthTicketDiscount(decimal, int) decimal
+    }
+
+    class AppDbContext {
+        +DbSet~Concert~ Concerts
+        +DbSet~Zone~ Zones
+        +DbSet~Reservation~ Reservations
+        +DbSet~PromoCode~ PromoCodes
+        #OnModelCreating(ModelBuilder) void
+    }
+
+    class Concert {
+        +int Id
+        +string Name
+        +string City
+        +string Location
+        +string ConcertDates
+        +string AdditionalInfo
+        +DateTime EarlyBirdDeadline
+        +ICollection~Zone~ Zones
+    }
+
+    class Zone {
+        +int Id
+        +int ConcertId
+        +string Name
+        +int Capacity
+        +decimal PricePerTicket
+        +Concert Concert
+        +ICollection~Reservation~ Reservations
+    }
+
+    class Reservation {
+        +int Id
+        +int ZoneId
+        +ReservationStatus Status
+        +string Token
+        +int TicketCount
+        +decimal TotalPrice
+        +bool IsEarlyBird
+        +DateTime CreatedAt
+        +string FirstName
+        +string LastName
+        +string Company
+        +string Address1
+        +string PostalCode
+        +string City
+        +string Country
+        +string Email
+        +int UsedPromoCodeId
+        +Zone Zone
+        +PromoCode OwnedPromoCode
+        +PromoCode UsedPromoCode
+    }
+
+    class PromoCode {
+        +int Id
+        +string Code
+        +PromoCodeStatus Status
+        +int OwnerReservationId
+        +int UsedByReservationId
+        +Reservation OwnerReservation
+        +Reservation UsedByReservation
+    }
+
+    class ReservationStatus {
+        <<enumeration>>
+        Active
+        Cancelled
+    }
+
+    class PromoCodeStatus {
+        <<enumeration>>
+        Active
+        Used
+        Cancelled
+    }
+
+    class ConcertInfoDto {
+        +int Id
+        +string Name
+        +string City
+        +string Location
+        +string ConcertDates
+        +DateTime EarlyBirdDeadline
+        +List~ZoneInfoDto~ Zones
+    }
+
+    class ZoneInfoDto {
+        +int Id
+        +string Name
+        +int Capacity
+        +int AvailableSeats
+        +decimal PricePerTicket
+    }
+
+    class CreateReservationDto {
+        +int ZoneId
+        +int TicketCount
+        +string FirstName
+        +string LastName
+        +string Company
+        +string Address1
+        +string PostalCode
+        +string City
+        +string Country
+        +string Email
+        +string PromoCode
+    }
+
+    class UpdateReservationDto {
+        +int TicketCount
+    }
+
+    class CancelReservationDto {
+        +string Email
+        +string Token
+    }
+
+    class ReservationResponseDto {
+        +int Id
+        +string Token
+        +decimal TotalPrice
+        +bool IsEarlyBird
+        +string GeneratedPromoCode
+        +string ZoneName
+        +int TicketCount
+    }
+
+    ConcertController --> IConcertService
+    ReservationController --> IReservationService
+    IConcertService <|.. ConcertService
+    IReservationService <|.. ReservationService
+    IPricingService <|.. PricingService
+    ConcertService --> AppDbContext
+    ReservationService --> AppDbContext
+    ReservationService --> IPricingService
+    AppDbContext --> Concert
+    AppDbContext --> Zone
+    AppDbContext --> Reservation
+    AppDbContext --> PromoCode
+    Concert "1" --> "0..*" Zone
+    Zone "1" --> "0..*" Reservation
+    Reservation --> ReservationStatus
+    PromoCode --> PromoCodeStatus
+    Reservation "1" --> "0..1" PromoCode : owns
+    ConcertInfoDto --> ZoneInfoDto
+    </pre>
+  </div>
+
+  <!-- =====================================================================
+       SEKCIJA 7 – STD
+       ===================================================================== -->
+  <h2 id="s7">7. Dijagrami prelaza stanja (STD)</h2>
+
+  <p>
+    STD dijagrami su primenljivi za dva entiteta u sistemu: <strong>Rezervaciju</strong>
+    (koja prolazi kroz ciklus kreiranja, opcione izmene i otkazivanja) i
+    <strong>Promo Kod</strong> (koji menja status u zavisnosti od akcija vlasnika i
+    prijatelja koji ga iskoristi).
+  </p>
+
+  <h3>7.1 STD – Rezervacija</h3>
+
+  <div class="diagram">
+    <pre class="mermaid">
+stateDiagram-v2
+    [*] --> Active : Kreiranje rezervacije\n(POST /api/reservations)
+
+    Active --> Active : Izmena broja karata\n(PUT /api/reservations/{token})\n[ima slobodnih mesta]
+
+    Active --> Cancelled : Otkazivanje\n(DELETE /api/reservations)\n[validan email + token]
+
+    Cancelled --> [*] : Token trajno neaktivan
+
+    note right of Active
+        Token je aktivan.
+        Kupac može pristupati
+        i menjati rezervaciju.
+    end note
+
+    note right of Cancelled
+        Token je neaktivan.
+        Promo kod ove rezervacije
+        postaje Cancelled (ako Active).
+    end note
+    </pre>
+  </div>
+
+  <h3>7.2 STD – Promo Kod</h3>
+
+  <div class="diagram">
+    <pre class="mermaid">
+stateDiagram-v2
+    [*] --> Active : Kreiranje rezervacije\n(automatski se generiše)
+
+    Active --> Used : Primenjen na drugu rezervaciju\n(POST /api/reservations sa promo kodom)
+
+    Active --> Cancelled : Vlasnik otkazao rezervaciju\n(DELETE /api/reservations)
+
+    Used --> Cancelled : Vlasnik otkazao rezervaciju\n(kod ostaje Used u bazi;\nrezervacija koja ga je koristila\nne gubi popust)
+
+    Used --> [*]
+    Cancelled --> [*]
+
+    note right of Active
+        Kod se može proslediti
+        prijatelju. Niko ga
+        još nije iskoristio.
+    end note
+
+    note right of Used
+        Tačno jedna rezervacija
+        je iskoristila ovaj kod.
+        Više se ne može koristiti.
+    end note
+
+    note right of Cancelled
+        Vlasnik je otkazao.
+        Kod je nevažeći.
+    end note
+    </pre>
+  </div>
+
+  <div class="info" style="margin-top:40px;">
+    <strong>Napomena o dijagramima:</strong>
+    Svi dijagrami su renderovani kroz Mermaid.js biblioteku. Za čuvanje kao slika, desni klik na
+    dijagram → "Sačuvaj sliku kao…" ili koristiti Print → Save as PDF iz menija pregledača
+    (preporučuje se Chrome/Edge, Format: A4, Margins: None).
+  </div>
+
+  <hr style="margin-top:60px; border:none; border-top:1px solid #ddd;">
+  <p style="text-align:center; color:#888; font-size:0.85rem; padding:20px 0;">
+    Mini Specifikacija – KoncertApp &nbsp;|&nbsp; Projektni zadatak FPIS/MAS &nbsp;|&nbsp; 2026.
+  </p>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      fontFamily: 'Segoe UI, Arial, sans-serif',
+      classDiagram: { useMaxWidth: false },
+      sequence: { useMaxWidth: false },
+      flowchart: { useMaxWidth: false }
+    });
+  </script>
+</body>
+</html>
