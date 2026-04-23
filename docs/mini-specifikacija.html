@@ -181,20 +181,21 @@
 
   <div class="diagram">
     <pre class="mermaid">
-graph LR
-    A1["👤 Posetilac"]
-    A2["👤 Kupac\n(email + token)"]
+%%{init: {'theme':'base','themeVariables':{'fontSize':'15px','primaryColor':'#ffffff','primaryTextColor':'#0f3460','primaryBorderColor':'#0f3460','lineColor':'#0f3460','clusterBkg':'#f4f6fb','clusterBorder':'#0f3460'}}}%%
+flowchart LR
+    A1(["👤 Posetilac"])
+    A2(["👤 Kupac<br/>email + token"])
 
-    subgraph SYS["  KoncertApp Sistem  "]
+    subgraph SYS["KoncertApp sistem"]
         direction TB
-        UC1(["UC1: Pregled informacija o koncertu"])
-        UC2(["UC2: Rezervacija karata"])
-        UC3(["UC3: Pregled i izmena rezervacije"])
-        UC4(["UC4: Otkazivanje rezervacije"])
-        UC2a(["«sub» Obračun cene"])
-        UC2b(["«sub» Primena promo koda"])
-        UC2c(["«sub» Generisanje tokena"])
-        UC2d(["«sub» Generisanje promo koda"])
+        UC1(["UC1<br/>Pregled informacija<br/>o koncertu"])
+        UC2(["UC2<br/>Rezervacija karata"])
+        UC3(["UC3<br/>Pregled i izmena<br/>rezervacije"])
+        UC4(["UC4<br/>Otkazivanje<br/>rezervacije"])
+        UC2a(["«include»<br/>Obračun cene"])
+        UC2b(["«extend»<br/>Primena promo koda"])
+        UC2c(["«include»<br/>Generisanje tokena"])
+        UC2d(["«include»<br/>Generisanje promo koda"])
     end
 
     A1 --> UC1
@@ -202,22 +203,21 @@ graph LR
     A2 --> UC3
     A2 --> UC4
 
-    UC2 -- "«include»" --> UC2a
-    UC2 -- "«include»" --> UC2c
-    UC2 -- "«include»" --> UC2d
-    UC2 -- "«extend»" --> UC2b
-    UC3 -- "«include»" --> UC2a
+    UC2 -. include .-> UC2a
+    UC2 -. include .-> UC2c
+    UC2 -. include .-> UC2d
+    UC2 -. extend .-> UC2b
+    UC3 -. include .-> UC2a
 
-    style A1 fill:#dbe9f7,stroke:#0f3460,color:#0f3460
-    style A2 fill:#dbe9f7,stroke:#0f3460,color:#0f3460
-    style UC1 fill:#fff,stroke:#0f3460
-    style UC2 fill:#fff,stroke:#0f3460
-    style UC3 fill:#fff,stroke:#0f3460
-    style UC4 fill:#fff,stroke:#e94560
-    style UC2a fill:#f0f0f0,stroke:#888
-    style UC2b fill:#f0f0f0,stroke:#888
-    style UC2c fill:#f0f0f0,stroke:#888
-    style UC2d fill:#f0f0f0,stroke:#888
+    classDef actor fill:#dbe9f7,stroke:#0f3460,stroke-width:2px,color:#0f3460
+    classDef usecase fill:#ffffff,stroke:#0f3460,stroke-width:1.5px,color:#0f3460
+    classDef cancel fill:#fde8ec,stroke:#e94560,stroke-width:1.5px,color:#b1223a
+    classDef sub fill:#f2f3f7,stroke:#8890a6,stroke-width:1px,color:#555,font-style:italic
+
+    class A1,A2 actor
+    class UC1,UC2,UC3 usecase
+    class UC4 cancel
+    class UC2a,UC2b,UC2c,UC2d sub
     </pre>
   </div>
 
@@ -353,7 +353,6 @@ classDiagram
         +string AdditionalInfo
         +DateTime EarlyBirdDeadline
     }
-
     class Zone {
         +int Id
         +int ConcertId
@@ -361,11 +360,10 @@ classDiagram
         +int Capacity
         +decimal PricePerTicket
     }
-
     class Reservation {
         +int Id
         +int ZoneId
-        +ReservationStatus Status
+        +string Status
         +string Token
         +int TicketCount
         +decimal TotalPrice
@@ -373,45 +371,34 @@ classDiagram
         +DateTime CreatedAt
         +string FirstName
         +string LastName
-        +string Company
+        +string Email
         +string Address1
-        +string Address2
         +string PostalCode
         +string City
         +string Country
-        +string Email
         +int UsedPromoCodeId
     }
-
     class PromoCode {
         +int Id
         +string Code
-        +PromoCodeStatus Status
+        +string Status
         +int OwnerReservationId
         +int UsedByReservationId
     }
 
-    class ReservationStatus {
-        <<enumeration>>
-        Active
-        Cancelled
-    }
-
-    class PromoCodeStatus {
-        <<enumeration>>
-        Active
-        Used
-        Cancelled
-    }
-
-    Concert "1" --> "0..*" Zone : sadrzi
-    Zone "1" --> "0..*" Reservation : ima
-    Reservation "1" --> "0..1" PromoCode : generise
-    PromoCode "0..1" --> "0..1" Reservation : koristi
-    Reservation --> ReservationStatus
-    PromoCode --> PromoCodeStatus
+    Concert "1" --> "1..*" Zone
+    Zone "1" --> "0..*" Reservation
+    Reservation "1" --> "0..1" PromoCode : owns
+    PromoCode "0..1" --> "0..1" Reservation : usedBy
     </pre>
   </div>
+
+  <p class="info" style="margin-top:-14px; margin-bottom:26px;">
+    <strong>Enumeracije:</strong>
+    <code>Reservation.Status ∈ { Active, Cancelled }</code>,
+    <code>PromoCode.Status ∈ { Active, Used, Cancelled }</code>.
+    Radi čitljivosti u bazi, EF Core ih čuva kao <code>TEXT</code> kolone.
+  </p>
 
   <h3>2.1 Opis entiteta</h3>
 
@@ -456,9 +443,10 @@ classDiagram
 
   <div class="diagram">
     <pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'fontSize':'13px','primaryColor':'#ffffff','primaryTextColor':'#0f3460','primaryBorderColor':'#0f3460','lineColor':'#0f3460'}}}%%
 erDiagram
     Concerts {
-        serial Id PK
+        int Id PK
         text Name
         text City
         text Location
@@ -466,23 +454,21 @@ erDiagram
         text AdditionalInfo "nullable"
         timestamptz EarlyBirdDeadline
     }
-
     Zones {
-        serial Id PK
-        integer ConcertId FK
+        int Id PK
+        int ConcertId FK
         text Name
-        integer Capacity
-        numeric_10_2 PricePerTicket
+        int Capacity
+        numeric PricePerTicket "10,2"
     }
-
     Reservations {
-        serial Id PK
-        integer ZoneId FK
-        text Status "Active|Cancelled"
+        int Id PK
+        int ZoneId FK
+        text Status "Active | Cancelled"
         text Token UK
-        integer TicketCount
-        numeric_10_2 TotalPrice
-        boolean IsEarlyBird
+        int TicketCount
+        numeric TotalPrice "10,2"
+        bool IsEarlyBird
         timestamptz CreatedAt
         text FirstName
         text LastName
@@ -493,21 +479,20 @@ erDiagram
         text City
         text Country
         text Email
-        integer UsedPromoCodeId "FK nullable"
+        int UsedPromoCodeId FK "nullable"
     }
-
     PromoCodes {
-        serial Id PK
+        int Id PK
         text Code UK
-        text Status "Active|Used|Cancelled"
-        integer OwnerReservationId "FK UK"
-        integer UsedByReservationId "FK nullable UK"
+        text Status "Active | Used | Cancelled"
+        int OwnerReservationId FK "UK"
+        int UsedByReservationId FK "nullable, UK"
     }
 
-    Concerts ||--|{ Zones : "ConcertId"
-    Zones ||--o{ Reservations : "ZoneId"
-    Reservations ||--o| PromoCodes : "OwnerReservationId (generiše)"
-    PromoCodes |o--o| Reservations : "UsedByReservationId (koristi)"
+    Concerts   ||--|{ Zones        : "sadrži"
+    Zones      ||--o{ Reservations : "prima"
+    Reservations ||--o| PromoCodes : "generiše (owner)"
+    PromoCodes |o--o| Reservations : "iskorišćen za"
     </pre>
   </div>
 
@@ -542,68 +527,63 @@ erDiagram
 
   <div class="diagram">
     <pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'fontSize':'13px','actorBkg':'#dbe9f7','actorBorder':'#0f3460','actorTextColor':'#0f3460','signalColor':'#0f3460','signalTextColor':'#0f3460','noteBkgColor':'#fff8e1','noteTextColor':'#5a4500','noteBorderColor':'#ffc107'}}}%%
 sequenceDiagram
-    actor Korisnik
+    autonumber
+    actor Kupac
     participant FE as React Frontend
     participant CTR as ReservationController
     participant SVC as ReservationService
     participant PRC as PricingService
     participant DB as PostgreSQL
 
-    Korisnik->>FE: Popuni formu (zona, br. karata, podaci kupca, promo?)
-    FE->>CTR: POST /api/reservations (CreateReservationDto)
+    Kupac->>FE: Popuni formu (zona, br. karata, podaci, promo?)
+    FE->>CTR: POST /api/reservation (CreateReservationDto)
     CTR->>SVC: CreateAsync(dto)
 
-    SVC->>DB: SELECT * FROM Zones WHERE Id = dto.ZoneId
-    DB-->>SVC: zona (Capacity, PricePerTicket)
+    SVC->>DB: SELECT Zone (+Concert) WHERE Id = ZoneId
+    DB-->>SVC: zona, EarlyBirdDeadline
 
-    SVC->>DB: SELECT SUM(TicketCount) FROM Reservations<br/>WHERE ZoneId=dto.ZoneId AND Status='Active'
+    SVC->>DB: SUM(TicketCount) aktivnih rezervacija u zoni
     DB-->>SVC: zauzetaMesta
 
-    alt nema dovoljno slobodnih mesta
-        SVC-->>CTR: BadRequest("Nema slobodnih mesta")
+    alt Nema dovoljno slobodnih mesta
+        SVC-->>CTR: throw InvalidOperationException
         CTR-->>FE: 400 Bad Request
-        FE-->>Korisnik: Prikaz greške
+        FE-->>Kupac: Prikaz greške
     end
 
     opt Korisnik je uneo promo kod
-        SVC->>DB: SELECT * FROM PromoCodes WHERE Code = dto.PromoCode
-        DB-->>SVC: promoKod (Status, OwnerReservationId)
-        alt promoKod nepostoji ili Status != Active
-            SVC-->>CTR: BadRequest("Nevalidan promo kod")
+        SVC->>DB: SELECT PromoCode WHERE Code = dto.PromoCode AND Status = Active
+        DB-->>SVC: promoKod
+        alt Promo kod ne postoji ili nije Active
+            SVC-->>CTR: throw InvalidOperationException
             CTR-->>FE: 400 Bad Request
-            FE-->>Korisnik: Prikaz greške
+            FE-->>Kupac: Prikaz greške
         end
     end
 
-    SVC->>DB: SELECT EarlyBirdDeadline FROM Concerts
-    DB-->>SVC: earlyBirdDeadline
-
-    SVC->>PRC: CalculateTotal(PricePerTicket, TicketCount,<br/>isEarlyBird, imaPromoKod)
-    Note over PRC: Korak 1: Early bird → cena * 0.90<br/>Korak 2: Svaka 5. karta → *0.50 od već snižene<br/>Korak 3: Promo → ukupno * 0.95
+    SVC->>PRC: CalculateTotal(price, count, isEarlyBird, hasPromo)
+    Note over PRC: 1) Early bird: unitPrice = base × 0.90<br/>2) Svaka 5. karta × 0.50 od unitPrice<br/>3) Promo: total × 0.95
     PRC-->>SVC: ukupnaCena
 
-    SVC->>SVC: token = Guid.NewGuid().ToString("N")
-    SVC->>SVC: noviKod = GenerateRandomPromoCode()
-
     SVC->>DB: BEGIN TRANSACTION
-    SVC->>DB: INSERT INTO Reservations (..., Token=token,<br/>TotalPrice=ukupnaCena, IsEarlyBird=...)
+    SVC->>DB: INSERT Reservation (Token = Guid, TotalPrice, IsEarlyBird, ...)
     DB-->>SVC: reservationId
-
-    SVC->>DB: INSERT INTO PromoCodes (Code=noviKod,<br/>OwnerReservationId=reservationId, Status='Active')
+    SVC->>DB: INSERT PromoCode (Code, OwnerReservationId = reservationId, Status = Active)
     DB-->>SVC: promoCodeId
 
-    opt Promo kod je bio iskorišćen
-        SVC->>DB: UPDATE PromoCodes SET Status='Used',<br/>UsedByReservationId=reservationId WHERE Code=dto.PromoCode
-        SVC->>DB: UPDATE Reservations SET UsedPromoCodeId=korisceniPromoId<br/>WHERE Id=reservationId
+    opt Iskorišćen tuđi promo kod
+        SVC->>DB: UPDATE PromoCode → Status = Used, UsedByReservationId = reservationId
+        SVC->>DB: UPDATE Reservation → UsedPromoCodeId
     end
 
     SVC->>DB: COMMIT
     DB-->>SVC: OK
 
-    SVC-->>CTR: ReservationResponseDto (Id, Token, TotalPrice,<br/>GeneratedPromoCode, ZoneName, TicketCount)
+    SVC-->>CTR: ReservationResponseDto (Token, TotalPrice, GeneratedPromoCode, ...)
     CTR-->>FE: 201 Created
-    FE-->>Korisnik: Prikaz potvrde rezervacije + token + promo kod
+    FE-->>Kupac: Potvrda: token + promo kod
     </pre>
   </div>
 
@@ -624,42 +604,35 @@ classDiagram
 
     class ReservationController {
         -IReservationService _service
-        +CreateReservation(CreateReservationDto) Task~IActionResult~
-        +GetReservation(string, string) Task~IActionResult~
-        +UpdateReservation(string, UpdateReservationDto) Task~IActionResult~
-        +CancelReservation(CancelReservationDto) Task~IActionResult~
+        +Create(dto) IActionResult
+        +Get(email, token) IActionResult
+        +Update(dto) IActionResult
+        +Cancel(dto) IActionResult
     }
-
     class IReservationService {
-        <<interface>>
-        +CreateAsync(CreateReservationDto) Task~ReservationResponseDto~
-        +GetByTokenAsync(string, string) Task~ReservationResponseDto~
-        +UpdateAsync(string, UpdateReservationDto) Task~ReservationResponseDto~
-        +CancelAsync(CancelReservationDto) Task
+        +CreateAsync(dto) ReservationResponseDto
+        +GetByTokenAsync(email, token) ReservationResponseDto
+        +UpdateAsync(dto) ReservationResponseDto
+        +CancelAsync(dto) void
     }
-
     class ReservationService {
         -AppDbContext _context
         -IPricingService _pricing
-        +CreateAsync(CreateReservationDto) Task~ReservationResponseDto~
-        +GetByTokenAsync(string, string) Task~ReservationResponseDto~
-        +UpdateAsync(string, UpdateReservationDto) Task~ReservationResponseDto~
-        +CancelAsync(CancelReservationDto) Task
-        -GenerateToken() string
+        +CreateAsync(dto) ReservationResponseDto
+        +GetByTokenAsync(email, token) ReservationResponseDto
+        +UpdateAsync(dto) ReservationResponseDto
+        +CancelAsync(dto) void
         -GeneratePromoCode() string
     }
-
     class IPricingService {
-        <<interface>>
-        +CalculateTotal(decimal, int, bool, bool) decimal
+        +CalculateTotal(price, count, isEarlyBird, hasPromo) decimal
     }
-
     class PricingService {
-        -decimal EARLY_BIRD_DISCOUNT$
-        -decimal FIFTH_TICKET_DISCOUNT$
-        -decimal PROMO_DISCOUNT$
-        +CalculateTotal(decimal, int, bool, bool) decimal
-        -ApplyFifthTicketDiscount(decimal, int) decimal
+        -decimal EarlyBirdDiscount
+        -decimal FifthTicketDiscount
+        -decimal PromoDiscount
+        +CalculateTotal(price, count, isEarlyBird, hasPromo) decimal
+        -ApplyFifthTicketDiscount(unit, count) decimal
     }
 
     class CreateReservationDto {
@@ -667,90 +640,76 @@ classDiagram
         +int TicketCount
         +string FirstName
         +string LastName
-        +string Company
+        +string Email
         +string Address1
-        +string Address2
         +string PostalCode
         +string City
         +string Country
-        +string Email
         +string PromoCode
     }
-
     class UpdateReservationDto {
+        +string Token
+        +string Email
         +int TicketCount
     }
-
     class CancelReservationDto {
-        +string Email
         +string Token
+        +string Email
     }
-
     class ReservationResponseDto {
         +int Id
         +string Token
+        +string Status
+        +string ZoneName
+        +int TicketCount
         +decimal TotalPrice
         +bool IsEarlyBird
         +string GeneratedPromoCode
-        +string ZoneName
-        +int TicketCount
+        +DateTime CreatedAt
     }
 
     class Reservation {
         +int Id
         +int ZoneId
-        +ReservationStatus Status
+        +string Status
         +string Token
         +int TicketCount
         +decimal TotalPrice
         +bool IsEarlyBird
-        +DateTime CreatedAt
-        +string FirstName
-        +string LastName
         +string Email
         +int UsedPromoCodeId
-        +Zone Zone
-        +PromoCode OwnedPromoCode
-        +PromoCode UsedPromoCode
     }
-
     class Zone {
         +int Id
         +int ConcertId
         +string Name
         +int Capacity
         +decimal PricePerTicket
-        +Concert Concert
-        +ICollection~Reservation~ Reservations
     }
-
     class PromoCode {
         +int Id
         +string Code
-        +PromoCodeStatus Status
+        +string Status
         +int OwnerReservationId
         +int UsedByReservationId
-        +Reservation OwnerReservation
-        +Reservation UsedByReservation
     }
-
     class AppDbContext {
-        +DbSet~Concert~ Concerts
-        +DbSet~Zone~ Zones
-        +DbSet~Reservation~ Reservations
-        +DbSet~PromoCode~ PromoCodes
+        +Concerts
+        +Zones
+        +Reservations
+        +PromoCodes
     }
 
-    ReservationController --> IReservationService : uses
-    IReservationService <|.. ReservationService : implements
-    ReservationService --> IPricingService : uses
-    IPricingService <|.. PricingService : implements
-    ReservationService --> AppDbContext : injects
-    ReservationController ..> CreateReservationDto : receives
-    ReservationController ..> ReservationResponseDto : returns
-    ReservationController ..> UpdateReservationDto : receives
-    ReservationController ..> CancelReservationDto : receives
-    Reservation --> Zone : belongs to
+    ReservationController --> IReservationService
+    ReservationService ..|> IReservationService
+    ReservationService --> IPricingService
+    PricingService ..|> IPricingService
+    ReservationService --> AppDbContext
+    ReservationController --> CreateReservationDto
+    ReservationController --> UpdateReservationDto
+    ReservationController --> CancelReservationDto
+    ReservationController --> ReservationResponseDto
+    Reservation --> Zone
     Reservation "1" --> "0..1" PromoCode : owns
     PromoCode "0..1" --> "0..1" Reservation : usedBy
     </pre>
@@ -773,65 +732,56 @@ classDiagram
 
     class ConcertController {
         -IConcertService _service
-        +GetConcertInfo() Task~IActionResult~
+        +GetConcertInfo() IActionResult
     }
-
     class ReservationController {
         -IReservationService _service
-        +CreateReservation(CreateReservationDto) Task~IActionResult~
-        +GetReservation(string, string) Task~IActionResult~
-        +UpdateReservation(string, UpdateReservationDto) Task~IActionResult~
-        +CancelReservation(CancelReservationDto) Task~IActionResult~
+        +Create(dto) IActionResult
+        +Get(email, token) IActionResult
+        +Update(dto) IActionResult
+        +Cancel(dto) IActionResult
     }
 
     class IConcertService {
-        <<interface>>
-        +GetConcertInfoAsync() Task~ConcertInfoDto~
+        +GetConcertInfoAsync() ConcertInfoDto
     }
-
     class IReservationService {
-        <<interface>>
-        +CreateAsync(CreateReservationDto) Task~ReservationResponseDto~
-        +GetByTokenAsync(string, string) Task~ReservationResponseDto~
-        +UpdateAsync(string, UpdateReservationDto) Task~ReservationResponseDto~
-        +CancelAsync(CancelReservationDto) Task
+        +CreateAsync(dto) ReservationResponseDto
+        +GetByTokenAsync(email, token) ReservationResponseDto
+        +UpdateAsync(dto) ReservationResponseDto
+        +CancelAsync(dto) void
     }
-
     class IPricingService {
-        <<interface>>
-        +CalculateTotal(decimal, int, bool, bool) decimal
+        +CalculateTotal(price, count, earlyBird, hasPromo) decimal
     }
 
     class ConcertService {
         -AppDbContext _context
-        +GetConcertInfoAsync() Task~ConcertInfoDto~
+        +GetConcertInfoAsync() ConcertInfoDto
     }
-
     class ReservationService {
         -AppDbContext _context
         -IPricingService _pricing
-        +CreateAsync(CreateReservationDto) Task~ReservationResponseDto~
-        +GetByTokenAsync(string, string) Task~ReservationResponseDto~
-        +UpdateAsync(string, UpdateReservationDto) Task~ReservationResponseDto~
-        +CancelAsync(CancelReservationDto) Task
-        -GenerateToken() string
+        +CreateAsync(dto) ReservationResponseDto
+        +GetByTokenAsync(email, token) ReservationResponseDto
+        +UpdateAsync(dto) ReservationResponseDto
+        +CancelAsync(dto) void
         -GeneratePromoCode() string
     }
-
     class PricingService {
-        -decimal EARLY_BIRD_DISCOUNT$
-        -decimal FIFTH_TICKET_DISCOUNT$
-        -decimal PROMO_DISCOUNT$
-        +CalculateTotal(decimal, int, bool, bool) decimal
-        -ApplyFifthTicketDiscount(decimal, int) decimal
+        -decimal EarlyBirdDiscount
+        -decimal FifthTicketDiscount
+        -decimal PromoDiscount
+        +CalculateTotal(price, count, earlyBird, hasPromo) decimal
+        -ApplyFifthTicketDiscount(unit, count) decimal
     }
 
     class AppDbContext {
-        +DbSet~Concert~ Concerts
-        +DbSet~Zone~ Zones
-        +DbSet~Reservation~ Reservations
-        +DbSet~PromoCode~ PromoCodes
-        #OnModelCreating(ModelBuilder) void
+        +Concerts
+        +Zones
+        +Reservations
+        +PromoCodes
+        #OnModelCreating(builder) void
     }
 
     class Concert {
@@ -842,63 +792,32 @@ classDiagram
         +string ConcertDates
         +string AdditionalInfo
         +DateTime EarlyBirdDeadline
-        +ICollection~Zone~ Zones
     }
-
     class Zone {
         +int Id
         +int ConcertId
         +string Name
         +int Capacity
         +decimal PricePerTicket
-        +Concert Concert
-        +ICollection~Reservation~ Reservations
     }
-
     class Reservation {
         +int Id
         +int ZoneId
-        +ReservationStatus Status
+        +string Status
         +string Token
         +int TicketCount
         +decimal TotalPrice
         +bool IsEarlyBird
         +DateTime CreatedAt
-        +string FirstName
-        +string LastName
-        +string Company
-        +string Address1
-        +string PostalCode
-        +string City
-        +string Country
         +string Email
         +int UsedPromoCodeId
-        +Zone Zone
-        +PromoCode OwnedPromoCode
-        +PromoCode UsedPromoCode
     }
-
     class PromoCode {
         +int Id
         +string Code
-        +PromoCodeStatus Status
+        +string Status
         +int OwnerReservationId
         +int UsedByReservationId
-        +Reservation OwnerReservation
-        +Reservation UsedByReservation
-    }
-
-    class ReservationStatus {
-        <<enumeration>>
-        Active
-        Cancelled
-    }
-
-    class PromoCodeStatus {
-        <<enumeration>>
-        Active
-        Used
-        Cancelled
     }
 
     class ConcertInfoDto {
@@ -908,9 +827,8 @@ classDiagram
         +string Location
         +string ConcertDates
         +DateTime EarlyBirdDeadline
-        +List~ZoneInfoDto~ Zones
+        +List Zones
     }
-
     class ZoneInfoDto {
         +int Id
         +string Name
@@ -918,45 +836,43 @@ classDiagram
         +int AvailableSeats
         +decimal PricePerTicket
     }
-
     class CreateReservationDto {
         +int ZoneId
         +int TicketCount
         +string FirstName
         +string LastName
-        +string Company
+        +string Email
         +string Address1
         +string PostalCode
         +string City
         +string Country
-        +string Email
         +string PromoCode
     }
-
     class UpdateReservationDto {
+        +string Token
+        +string Email
         +int TicketCount
     }
-
     class CancelReservationDto {
-        +string Email
         +string Token
+        +string Email
     }
-
     class ReservationResponseDto {
         +int Id
         +string Token
+        +string Status
+        +string ZoneName
+        +int TicketCount
         +decimal TotalPrice
         +bool IsEarlyBird
         +string GeneratedPromoCode
-        +string ZoneName
-        +int TicketCount
     }
 
     ConcertController --> IConcertService
     ReservationController --> IReservationService
-    IConcertService <|.. ConcertService
-    IReservationService <|.. ReservationService
-    IPricingService <|.. PricingService
+    ConcertService ..|> IConcertService
+    ReservationService ..|> IReservationService
+    PricingService ..|> IPricingService
     ConcertService --> AppDbContext
     ReservationService --> AppDbContext
     ReservationService --> IPricingService
@@ -964,14 +880,19 @@ classDiagram
     AppDbContext --> Zone
     AppDbContext --> Reservation
     AppDbContext --> PromoCode
-    Concert "1" --> "0..*" Zone
+    Concert "1" --> "1..*" Zone
     Zone "1" --> "0..*" Reservation
-    Reservation --> ReservationStatus
-    PromoCode --> PromoCodeStatus
     Reservation "1" --> "0..1" PromoCode : owns
     ConcertInfoDto --> ZoneInfoDto
     </pre>
   </div>
+
+  <p class="info" style="margin-top:-10px;">
+    <strong>Napomene:</strong> interfejsi (<code>IConcertService</code>, <code>IReservationService</code>,
+    <code>IPricingService</code>) su apstraktni ugovori — implementacije ih realizuju strelicom <code>..|&gt;</code>.
+    Statuses <code>Reservation.Status</code> i <code>PromoCode.Status</code> su C# enum-ovi
+    (<code>Active/Cancelled</code> i <code>Active/Used/Cancelled</code>), perzistirani kao <code>TEXT</code> u bazi.
+  </p>
 
   <!-- =====================================================================
        SEKCIJA 7 – STD
@@ -989,25 +910,24 @@ classDiagram
 
   <div class="diagram">
     <pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'fontSize':'14px','primaryColor':'#ffffff','primaryTextColor':'#0f3460','primaryBorderColor':'#0f3460','lineColor':'#0f3460'}}}%%
 stateDiagram-v2
-    [*] --> Active : Kreiranje rezervacije\n(POST /api/reservations)
-
-    Active --> Active : Izmena broja karata\n(PUT /api/reservations/{token})\n[ima slobodnih mesta]
-
-    Active --> Cancelled : Otkazivanje\n(DELETE /api/reservations)\n[validan email + token]
-
-    Cancelled --> [*] : Token trajno neaktivan
+    direction LR
+    [*] --> Active : POST /api/reservation
+    Active --> Active : PUT /api/reservation (izmena br. karata, ako ima mesta)
+    Active --> Cancelled : DELETE /api/reservation (email + token)
+    Cancelled --> [*] : token trajno neaktivan
 
     note right of Active
-        Token je aktivan.
-        Kupac može pristupati
-        i menjati rezervaciju.
+      Token je aktivan.
+      Kupac može da pregleda
+      i menja rezervaciju.
     end note
 
     note right of Cancelled
-        Token je neaktivan.
-        Promo kod ove rezervacije
-        postaje Cancelled (ako Active).
+      Token je neaktivan.
+      Owned PromoCode (ako je Active)
+      prelazi u Cancelled.
     end note
     </pre>
   </div>
@@ -1016,33 +936,33 @@ stateDiagram-v2
 
   <div class="diagram">
     <pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'fontSize':'14px','primaryColor':'#ffffff','primaryTextColor':'#0f3460','primaryBorderColor':'#0f3460','lineColor':'#0f3460'}}}%%
 stateDiagram-v2
-    [*] --> Active : Kreiranje rezervacije\n(automatski se generiše)
-
-    Active --> Used : Primenjen na drugu rezervaciju\n(POST /api/reservations sa promo kodom)
-
-    Active --> Cancelled : Vlasnik otkazao rezervaciju\n(DELETE /api/reservations)
-
-    Used --> Cancelled : Vlasnik otkazao rezervaciju\n(kod ostaje Used u bazi;\nrezervacija koja ga je koristila\nne gubi popust)
-
+    direction LR
+    [*] --> Active : automatski pri kreiranju rezervacije
+    Active --> Used : druga rezervacija primenila kod (POST sa promo)
+    Active --> Cancelled : vlasnik otkazao rezervaciju
     Used --> [*]
     Cancelled --> [*]
 
     note right of Active
-        Kod se može proslediti
-        prijatelju. Niko ga
-        još nije iskoristio.
+      Kod se može proslediti
+      prijatelju. Još uvek nije
+      iskorišćen.
     end note
 
     note right of Used
-        Tačno jedna rezervacija
-        je iskoristila ovaj kod.
-        Više se ne može koristiti.
+      Tačno jedna rezervacija
+      je iskoristila kod.
+      Ako vlasnik posle otkaže —
+      kod ostaje Used, popust se
+      drugoj rezervaciji ne poništava.
     end note
 
     note right of Cancelled
-        Vlasnik je otkazao.
-        Kod je nevažeći.
+      Vlasnik je otkazao rezervaciju
+      pre nego što je iko iskoristio kod.
+      Kod je nevažeći.
     end note
     </pre>
   </div>
@@ -1062,12 +982,21 @@ stateDiagram-v2
   <script>
     mermaid.initialize({
       startOnLoad: true,
-      theme: 'default',
+      theme: 'base',
       securityLevel: 'loose',
       fontFamily: 'Segoe UI, Arial, sans-serif',
-      classDiagram: { useMaxWidth: false },
-      sequence: { useMaxWidth: false },
-      flowchart: { useMaxWidth: false }
+      themeVariables: {
+        primaryColor: '#ffffff',
+        primaryTextColor: '#0f3460',
+        primaryBorderColor: '#0f3460',
+        lineColor: '#0f3460',
+        fontSize: '14px'
+      },
+      flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis', padding: 16 },
+      sequence:  { useMaxWidth: true, mirrorActors: false, showSequenceNumbers: false, boxMargin: 12, messageMargin: 36 },
+      classDiagram: { useMaxWidth: true },
+      state: { useMaxWidth: true },
+      er: { useMaxWidth: true, diagramPadding: 20 }
     });
   </script>
 </body>

@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16
+    container_name: koncertapp-db
+    environment:
+      POSTGRES_DB: koncertapp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5433:5432"
+    volumes:
+      - koncertapp_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d koncertapp"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  koncertapp_pgdata:
