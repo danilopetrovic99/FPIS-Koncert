@@ -31,7 +31,7 @@ export default function Home() {
   if (loading) {
     return (
       <div className="stack" aria-busy>
-        <div className="skeleton" style={{ height: 280, borderRadius: 28 }} />
+        <div className="skeleton" style={{ height: 280 }} />
         <div className="zones-grid">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="skeleton" style={{ height: 220 }} />
@@ -58,11 +58,9 @@ export default function Home() {
     <div className="stack" style={{ gap: 32 }}>
       {/* HERO */}
       <section className="hero">
-        <div className="hero__grid" aria-hidden />
         <div className="hero__content">
           {concert.isEarlyBirdActive && (
             <span className="hero__badge">
-              <span className="hero__badge__pulse" aria-hidden />
               Early Bird aktivan — do {formatDate(concert.earlyBirdDeadline)}
             </span>
           )}
@@ -137,19 +135,19 @@ export default function Home() {
 
         <div className="zones-grid">
           <div className="panel panel--tight">
-            <h4 style={{ color: '#ffb4c6' }}>Early Bird −10%</h4>
+            <h4>Early Bird −10%</h4>
             <p className="muted" style={{ marginTop: 8 }}>
               Automatski na sve karte kupljene do {formatDate(concert.earlyBirdDeadline)}.
             </p>
           </div>
           <div className="panel panel--tight">
-            <h4 style={{ color: '#b8f4e4' }}>Svaka 5. karta −50%</h4>
+            <h4>Svaka 5. karta −50%</h4>
             <p className="muted" style={{ marginTop: 8 }}>
               Primenjuje se na poziciju 5, 10, 15… u okviru iste rezervacije.
             </p>
           </div>
           <div className="panel panel--tight">
-            <h4 style={{ color: '#ffd89e' }}>Promo kod −5%</h4>
+            <h4>Promo kod −5%</h4>
             <p className="muted" style={{ marginTop: 8 }}>
               Svaka rezervacija automatski generiše promo kod za prijatelja.
             </p>

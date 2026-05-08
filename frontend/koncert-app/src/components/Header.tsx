@@ -6,7 +6,7 @@ export default function Header() {
       <div className="container header__inner">
         <Link to="/" className="brand">
           <span className="brand__dot">K</span>
-          <span>
+          <span className="brand__name">
             KoncertApp <small>· Eros Ramazzotti</small>
           </span>
         </Link>
