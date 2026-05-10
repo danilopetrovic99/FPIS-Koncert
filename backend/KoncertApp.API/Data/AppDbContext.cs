@@ -12,35 +12,30 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Zone → Concert
         modelBuilder.Entity<Zone>()
             .HasOne(z => z.Concert)
             .WithMany(c => c.Zones)
             .HasForeignKey(z => z.ConcertId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Reservation → Zone
         modelBuilder.Entity<Reservation>()
             .HasOne(r => r.Zone)
             .WithMany(z => z.Reservations)
             .HasForeignKey(r => r.ZoneId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Reservation → PromoCode used (nullable)
         modelBuilder.Entity<Reservation>()
             .HasOne(r => r.UsedPromoCode)
             .WithOne(p => p.UsedByReservation)
             .HasForeignKey<PromoCode>(p => p.UsedByReservationId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        // PromoCode → OwnerReservation
         modelBuilder.Entity<PromoCode>()
             .HasOne(p => p.OwnerReservation)
             .WithOne(r => r.OwnedPromoCode)
             .HasForeignKey<PromoCode>(p => p.OwnerReservationId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Unique constraints
         modelBuilder.Entity<Reservation>()
             .HasIndex(r => r.Token)
             .IsUnique();
@@ -49,7 +44,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasIndex(p => p.Code)
             .IsUnique();
 
-        // Store enums as strings for readability in DB
         modelBuilder.Entity<Reservation>()
             .Property(r => r.Status)
             .HasConversion<string>();
@@ -58,7 +52,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .Property(p => p.Status)
             .HasConversion<string>();
 
-        // Decimal precision
         modelBuilder.Entity<Zone>()
             .Property(z => z.PricePerTicket)
             .HasPrecision(10, 2);

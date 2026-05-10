@@ -22,7 +22,6 @@ public class ConcertService : IConcertService
 
         if (concert is null) return null;
 
-        // Dohvati zauzeta mesta za sve zone u jednom upitu (izbegava N+1)
         var zoneIds = concert.Zones.Select(z => z.Id).ToList();
         var occupiedByZone = await _context.Reservations
             .Where(r => zoneIds.Contains(r.ZoneId) && r.Status == ReservationStatus.Active)

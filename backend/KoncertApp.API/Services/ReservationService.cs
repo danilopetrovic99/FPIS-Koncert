@@ -18,13 +18,11 @@ public class ReservationService : IReservationService
 
     public async Task<ReservationResponseDto> CreateAsync(CreateReservationDto dto)
     {
-        // 1. Zona mora da postoji
         var zone = await _context.Zones
             .Include(z => z.Concert)
             .FirstOrDefaultAsync(z => z.Id == dto.ZoneId)
             ?? throw new InvalidOperationException("Zona nije pronađena.");
 
-        // 2. Provjera slobodnih mesta
         int occupied = await _context.Reservations
             .Where(r => r.ZoneId == dto.ZoneId && r.Status == ReservationStatus.Active)
             .SumAsync(r => (int?)r.TicketCount) ?? 0;
@@ -34,7 +32,6 @@ public class ReservationService : IReservationService
             throw new InvalidOperationException(
                 $"Nema dovoljno slobodnih mesta u zoni '{zone.Name}'. Dostupno: {available}.");
 
-        // 3. Validacija promo koda (opcionalno)
         PromoCode? usedPromo = null;
         if (!string.IsNullOrWhiteSpace(dto.PromoCode))
         {
@@ -43,52 +40,48 @@ public class ReservationService : IReservationService
                 ?? throw new InvalidOperationException("Promo kod nije validan ili je već iskorišćen.");
         }
 
-        // 4. Obračun cene
         bool isEarlyBird = DateTime.UtcNow <= zone.Concert.EarlyBirdDeadline;
         decimal total = _pricing.CalculateTotal(zone.PricePerTicket, dto.TicketCount, isEarlyBird, usedPromo is not null);
 
-        // 5. Kreiranje rezervacije i promo koda u transakciji
         await using var tx = await _context.Database.BeginTransactionAsync();
         try
         {
             var reservation = new Reservation
             {
-                ZoneId       = dto.ZoneId,
-                Status       = ReservationStatus.Active,
-                Token        = Guid.NewGuid().ToString("N"),
-                TicketCount  = dto.TicketCount,
-                TotalPrice   = total,
-                IsEarlyBird  = isEarlyBird,
-                CreatedAt    = DateTime.UtcNow,
-                FirstName    = dto.FirstName,
-                LastName     = dto.LastName,
-                Company      = dto.Company,
-                Address1     = dto.Address1,
-                Address2     = dto.Address2,
-                PostalCode   = dto.PostalCode,
-                City         = dto.City,
-                Country      = dto.Country,
-                Email        = dto.Email
+                ZoneId = dto.ZoneId,
+                Status = ReservationStatus.Active,
+                Token = Guid.NewGuid().ToString("N"),
+                TicketCount = dto.TicketCount,
+                TotalPrice = total,
+                IsEarlyBird = isEarlyBird,
+                CreatedAt = DateTime.UtcNow,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Company = dto.Company,
+                Address1 = dto.Address1,
+                Address2 = dto.Address2,
+                PostalCode = dto.PostalCode,
+                City = dto.City,
+                Country = dto.Country,
+                Email = dto.Email
             };
 
             _context.Reservations.Add(reservation);
             await _context.SaveChangesAsync();
 
-            // Generiši promo kod za ovu rezervaciju
             var ownedPromo = new PromoCode
             {
-                Code                = GeneratePromoCode(),
-                Status              = PromoCodeStatus.Active,
-                OwnerReservationId  = reservation.Id
+                Code = GeneratePromoCode(),
+                Status = PromoCodeStatus.Active,
+                OwnerReservationId = reservation.Id
             };
             _context.PromoCodes.Add(ownedPromo);
 
-            // Označi iskorišćeni promo kod
             if (usedPromo is not null)
             {
-                usedPromo.Status              = PromoCodeStatus.Used;
+                usedPromo.Status = PromoCodeStatus.Used;
                 usedPromo.UsedByReservationId = reservation.Id;
-                reservation.UsedPromoCodeId   = usedPromo.Id;
+                reservation.UsedPromoCodeId = usedPromo.Id;
             }
 
             await _context.SaveChangesAsync();
@@ -129,7 +122,6 @@ public class ReservationService : IReservationService
                 r.Status == ReservationStatus.Active)
             ?? throw new InvalidOperationException("Rezervacija nije pronađena ili je otkazana.");
 
-        // Provjera kapaciteta (isključi tekuću rezervaciju iz zbira)
         int occupied = await _context.Reservations
             .Where(r => r.ZoneId == reservation.ZoneId &&
                         r.Status == ReservationStatus.Active &&
@@ -141,13 +133,12 @@ public class ReservationService : IReservationService
             throw new InvalidOperationException(
                 $"Nema dovoljno slobodnih mesta. Dostupno: {available}.");
 
-        // Ponovi obračun cene sa novim brojem karata
         bool isEarlyBird = DateTime.UtcNow <= reservation.Zone.Concert.EarlyBirdDeadline;
-        bool hasPromo    = reservation.UsedPromoCodeId.HasValue;
-        decimal total    = _pricing.CalculateTotal(reservation.Zone.PricePerTicket, dto.TicketCount, isEarlyBird, hasPromo);
+        bool hasPromo = reservation.UsedPromoCodeId.HasValue;
+        decimal total = _pricing.CalculateTotal(reservation.Zone.PricePerTicket, dto.TicketCount, isEarlyBird, hasPromo);
 
         reservation.TicketCount = dto.TicketCount;
-        reservation.TotalPrice  = total;
+        reservation.TotalPrice = total;
         reservation.IsEarlyBird = isEarlyBird;
 
         await _context.SaveChangesAsync();
@@ -167,38 +158,36 @@ public class ReservationService : IReservationService
 
         reservation.Status = ReservationStatus.Cancelled;
 
-        // Promo kod ove rezervacije postaje Cancelled (ako još nije iskorišćen)
         if (reservation.OwnedPromoCode?.Status == PromoCodeStatus.Active)
             reservation.OwnedPromoCode.Status = PromoCodeStatus.Cancelled;
 
         await _context.SaveChangesAsync();
     }
 
-    // Generiše 8-karakterni uppercase promo kod
     private static string GeneratePromoCode()
         => Guid.NewGuid().ToString("N")[..8].ToUpper();
 
     private static ReservationResponseDto MapToResponse(Reservation r, string zoneName, string promoCode)
         => new()
         {
-            Id                  = r.Id,
-            Token               = r.Token,
-            Status              = r.Status.ToString(),
-            ZoneId              = r.ZoneId,
-            ZoneName            = zoneName,
-            TicketCount         = r.TicketCount,
-            TotalPrice          = r.TotalPrice,
-            IsEarlyBird         = r.IsEarlyBird,
-            GeneratedPromoCode  = promoCode,
-            CreatedAt           = r.CreatedAt,
-            FirstName           = r.FirstName,
-            LastName            = r.LastName,
-            Email               = r.Email,
-            Company             = r.Company,
-            Address1            = r.Address1,
-            Address2            = r.Address2,
-            PostalCode          = r.PostalCode,
-            City                = r.City,
-            Country             = r.Country
+            Id = r.Id,
+            Token = r.Token,
+            Status = r.Status.ToString(),
+            ZoneId = r.ZoneId,
+            ZoneName = zoneName,
+            TicketCount = r.TicketCount,
+            TotalPrice = r.TotalPrice,
+            IsEarlyBird = r.IsEarlyBird,
+            GeneratedPromoCode = promoCode,
+            CreatedAt = r.CreatedAt,
+            FirstName = r.FirstName,
+            LastName = r.LastName,
+            Email = r.Email,
+            Company = r.Company,
+            Address1 = r.Address1,
+            Address2 = r.Address2,
+            PostalCode = r.PostalCode,
+            City = r.City,
+            Country = r.Country
         };
 }

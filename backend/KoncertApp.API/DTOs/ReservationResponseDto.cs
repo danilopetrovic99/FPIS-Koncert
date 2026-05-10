@@ -13,7 +13,6 @@ public class ReservationResponseDto
     public string GeneratedPromoCode { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
 
-    // Podaci kupca
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;

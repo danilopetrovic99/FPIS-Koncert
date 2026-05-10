@@ -66,7 +66,3 @@ export interface ReservationResponse {
   city: string;
   country: string;
 }
-
-export interface ApiError {
-  message: string;
-}

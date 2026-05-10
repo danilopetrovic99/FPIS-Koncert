@@ -25,11 +25,11 @@ public static class DbInitializer
             EarlyBirdDeadline = DateTime.UtcNow.AddDays(30),
             Zones = new List<Zone>
             {
-                new() { Name = "VIP Parter",    Capacity = 200,  PricePerTicket = 12000m },
-                new() { Name = "Parter",        Capacity = 800,  PricePerTicket = 7500m  },
-                new() { Name = "Tribina Istok", Capacity = 1200, PricePerTicket = 5500m  },
-                new() { Name = "Tribina Zapad", Capacity = 1200, PricePerTicket = 5500m  },
-                new() { Name = "Balkon",        Capacity = 1500, PricePerTicket = 3900m  }
+                new() { Name = "VIP Parter", Capacity = 200, PricePerTicket = 12000m },
+                new() { Name = "Parter", Capacity = 800, PricePerTicket = 7500m },
+                new() { Name = "Tribina Istok", Capacity = 1200, PricePerTicket = 5500m },
+                new() { Name = "Tribina Zapad", Capacity = 1200, PricePerTicket = 5500m },
+                new() { Name = "Balkon", Capacity = 1500, PricePerTicket = 3900m }
             }
         };
 

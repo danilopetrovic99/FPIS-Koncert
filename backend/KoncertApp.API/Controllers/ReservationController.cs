@@ -15,9 +15,6 @@ public class ReservationController : ControllerBase
         _service = service;
     }
 
-    /// <summary>
-    /// Kreira novu rezervaciju. Vraća token i generirani promo kod.
-    /// </summary>
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateReservationDto dto)
     {
@@ -34,9 +31,6 @@ public class ReservationController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Dohvata aktivnu rezervaciju po emailu i tokenu.
-    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] string email, [FromQuery] string token)
     {
@@ -51,9 +45,6 @@ public class ReservationController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Menja broj karata u rezervaciji uz ponovni obračun cene.
-    /// </summary>
     [HttpPut]
     public async Task<IActionResult> Update([FromBody] UpdateReservationDto dto)
     {
@@ -68,9 +59,6 @@ public class ReservationController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Otkazuje rezervaciju. Token i promo kod postaju trajno neaktivni.
-    /// </summary>
     [HttpDelete]
     public async Task<IActionResult> Cancel([FromBody] CancelReservationDto dto)
     {

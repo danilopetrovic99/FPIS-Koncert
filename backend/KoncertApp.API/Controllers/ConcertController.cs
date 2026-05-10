@@ -14,9 +14,6 @@ public class ConcertController : ControllerBase
         _service = service;
     }
 
-    /// <summary>
-    /// Vraća informacije o koncertu zajedno sa zonama i dostupnim mestima.
-    /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetConcertInfo()
     {

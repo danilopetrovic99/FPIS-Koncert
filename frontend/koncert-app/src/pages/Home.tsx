@@ -56,7 +56,6 @@ export default function Home() {
 
   return (
     <div className="stack" style={{ gap: 32 }}>
-      {/* HERO */}
       <section className="hero">
         <div className="hero__content">
           {concert.isEarlyBirdActive && (
@@ -105,7 +104,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ZONE */}
       <section id="zones">
         <div className="section-title">
           <div>
@@ -124,7 +122,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PRICING PRAVILA */}
       <section>
         <div className="section-title">
           <div>

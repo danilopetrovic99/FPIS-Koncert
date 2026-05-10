@@ -1,11 +1,3 @@
-/**
- * Pricing pravila identična backend-u (KoncertApp.API.Services.PricingService).
- * Koristi se za live prikaz total-a pre nego što se napravi rezervacija.
- *
- * 1) Early bird  -10% na jediničnu cenu (ako je aktivan)
- * 2) Svaka 5.  -50% od već snižene jedinične cene
- * 3) Promo kod -5% na ukupan zbir
- */
 const EARLY_BIRD = 0.10;
 const FIFTH_DISCOUNT = 0.50;
 const PROMO = 0.05;

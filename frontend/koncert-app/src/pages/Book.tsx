@@ -146,7 +146,6 @@ export default function Book() {
       </div>
 
       <form className="booking-layout" onSubmit={handleSubmit} noValidate>
-        {/* LEVI PANEL — forma */}
         <div className="stack">
           <div className="panel">
             <h3>Izbor karata</h3>
@@ -276,7 +275,6 @@ export default function Book() {
           {submitError && <Alert variant="error">{submitError}</Alert>}
         </div>
 
-        {/* DESNI PANEL — summary */}
         <aside className="panel summary">
           <h3>Pregled</h3>
           <div style={{ marginTop: 14 }}>
