@@ -340,65 +340,8 @@ flowchart LR
   </p>
 
   <div class="diagram">
-    <pre class="mermaid">
-classDiagram
-    direction LR
-
-    class Concert {
-        +int Id
-        +string Name
-        +string City
-        +string Location
-        +string ConcertDates
-        +string AdditionalInfo
-        +DateTime EarlyBirdDeadline
-    }
-    class Zone {
-        +int Id
-        +int ConcertId
-        +string Name
-        +int Capacity
-        +decimal PricePerTicket
-    }
-    class Reservation {
-        +int Id
-        +int ZoneId
-        +string Status
-        +string Token
-        +int TicketCount
-        +decimal TotalPrice
-        +bool IsEarlyBird
-        +DateTime CreatedAt
-        +string FirstName
-        +string LastName
-        +string Email
-        +string Address1
-        +string PostalCode
-        +string City
-        +string Country
-        +int UsedPromoCodeId
-    }
-    class PromoCode {
-        +int Id
-        +string Code
-        +string Status
-        +int OwnerReservationId
-        +int UsedByReservationId
-    }
-
-    Concert "1" --> "1..*" Zone
-    Zone "1" --> "0..*" Reservation
-    Reservation "1" --> "0..1" PromoCode : owns
-    PromoCode "0..1" --> "0..1" Reservation : usedBy
-    </pre>
+    <img src="PMOV222.drawio.png" alt="Chen ER Dijagram – KoncertApp" style="width:1600px; height:auto;">
   </div>
-
-  <p class="info" style="margin-top:-14px; margin-bottom:26px;">
-    <strong>Enumeracije:</strong>
-    <code>Reservation.Status ∈ { Active, Cancelled }</code>,
-    <code>PromoCode.Status ∈ { Active, Used, Cancelled }</code>.
-    Radi čitljivosti u bazi, EF Core ih čuva kao <code>TEXT</code> kolone.
-  </p>
 
   <h3>2.1 Opis entiteta</h3>
 
@@ -438,7 +381,6 @@ classDiagram
   <p>
     Fizički model prikazuje tabele, tipove podataka, primarne ključeve (PK), spoljne ključeve (FK)
     i jedinstvena ograničenja (UK) onako kako su definisani u PostgreSQL bazi podataka.
-    Model je generisan kroz EF Core migracije (<code>Npgsql.EntityFrameworkCore.PostgreSQL 8.x</code>).
   </p>
 
   <div class="diagram">
@@ -887,12 +829,6 @@ classDiagram
     </pre>
   </div>
 
-  <p class="info" style="margin-top:-10px;">
-    <strong>Napomene:</strong> interfejsi (<code>IConcertService</code>, <code>IReservationService</code>,
-    <code>IPricingService</code>) su apstraktni ugovori — implementacije ih realizuju strelicom <code>..|&gt;</code>.
-    Statuses <code>Reservation.Status</code> i <code>PromoCode.Status</code> su C# enum-ovi
-    (<code>Active/Cancelled</code> i <code>Active/Used/Cancelled</code>), perzistirani kao <code>TEXT</code> u bazi.
-  </p>
 
   <!-- =====================================================================
        SEKCIJA 7 – STD
@@ -965,13 +901,6 @@ stateDiagram-v2
       Kod je nevažeći.
     end note
     </pre>
-  </div>
-
-  <div class="info" style="margin-top:40px;">
-    <strong>Napomena o dijagramima:</strong>
-    Svi dijagrami su renderovani kroz Mermaid.js biblioteku. Za čuvanje kao slika, desni klik na
-    dijagram → "Sačuvaj sliku kao…" ili koristiti Print → Save as PDF iz menija pregledača
-    (preporučuje se Chrome/Edge, Format: A4, Margins: None).
   </div>
 
   <hr style="margin-top:60px; border:none; border-top:1px solid #ddd;">
