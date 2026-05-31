@@ -1,15 +1,12 @@
 import { useLocation, Link, Navigate } from 'react-router-dom';
-import type { ReservationResponse } from '../api/types';
 import { formatRsd } from '../lib/format';
 import { useState } from 'react';
 
-interface LocState {
-  reservation?: ReservationResponse;
-}
-
 export default function Confirmation() {
   const { state } = useLocation();
-  const reservation = (state as LocState | null)?.reservation;
+  // iz Book.tsx dobijamo i rezervaciju i pricing (razrada popusta)
+  const reservation = (state as any)?.reservation;
+  const pricing = (state as any)?.pricing;
 
   if (!reservation) return <Navigate to="/" replace />;
 
@@ -34,10 +31,26 @@ export default function Confirmation() {
         <div style={{ marginTop: 14 }}>
           <Row label="Zona" value={reservation.zoneName} />
           <Row label="Broj karata" value={reservation.ticketCount.toString()} />
-          <Row
-            label="Early bird"
-            value={reservation.isEarlyBird ? 'Primenjen −10%' : 'Nije primenjen'}
-          />
+
+          {/* iznosi popusta (ako imamo pricing iz prethodne strane) */}
+          {pricing && pricing.earlyBirdSavings > 0 && (
+            <Row label="Early bird −10%" value={`−${formatRsd(pricing.earlyBirdSavings)}`} />
+          )}
+          {pricing && pricing.fifthTicketSavings > 0 && (
+            <Row label="Svaka 5. karta −50%" value={`−${formatRsd(pricing.fifthTicketSavings)}`} />
+          )}
+          {pricing && pricing.promoSavings > 0 && (
+            <Row label="Promo kod −5%" value={`−${formatRsd(pricing.promoSavings)}`} />
+          )}
+
+          {/* ako nemamo pricing, prikazi bar da li je early bird primenjen */}
+          {!pricing && (
+            <Row
+              label="Early bird"
+              value={reservation.isEarlyBird ? 'Primenjen −10%' : 'Nije primenjen'}
+            />
+          )}
+
           <Row label="Ukupno" value={formatRsd(reservation.totalPrice)} bold />
           <Row label="Email" value={reservation.email} />
         </div>

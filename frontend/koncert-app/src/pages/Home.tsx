@@ -14,14 +14,10 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
     getConcert()
-      .then((c) => !cancelled && setConcert(c))
-      .catch((e) => !cancelled && setError(extractErrorMessage(e)))
-      .finally(() => !cancelled && setLoading(false));
-    return () => {
-      cancelled = true;
-    };
+      .then((c) => setConcert(c))
+      .catch((e) => setError(extractErrorMessage(e)))
+      .finally(() => setLoading(false));
   }, []);
 
   const goBook = (zone?: ZoneInfo) => {

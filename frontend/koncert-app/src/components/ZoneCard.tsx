@@ -10,7 +10,8 @@ interface Props {
 export default function ZoneCard({ zone, onSelect, compact }: Props) {
   const soldOut = zone.availableSeats <= 0;
   const low = !soldOut && zone.availableSeats / zone.capacity < 0.15;
-  const filled = ((zone.capacity - zone.availableSeats) / zone.capacity) * 100;
+  // koliko je procenata zone popunjeno (za traku ispod cene)
+  const popunjenost = ((zone.capacity - zone.availableSeats) / zone.capacity) * 100;
 
   return (
     <div className={`zone-card ${soldOut ? 'zone-card--soldout' : ''}`}>
@@ -32,7 +33,7 @@ export default function ZoneCard({ zone, onSelect, compact }: Props) {
 
       <div>
         <div className="zone-card__bar" aria-hidden>
-          <span style={{ width: `${Math.min(100, Math.max(3, filled))}%` }} />
+          <span style={{ width: `${Math.min(100, Math.max(3, popunjenost))}%` }} />
         </div>
         <div className="zone-card__avail">
           <span>{zone.availableSeats} slobodnih mesta</span>

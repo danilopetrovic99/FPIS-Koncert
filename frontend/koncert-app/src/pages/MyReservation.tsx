@@ -8,19 +8,14 @@ import {
 } from '../api/endpoints';
 import { extractErrorMessage } from '../api/client';
 import type { ReservationResponse, ConcertInfo } from '../api/types';
-import { Field } from '../components/Field';
 import TicketCounter from '../components/TicketCounter';
 import Alert from '../components/Alert';
 import { formatRsd, formatDate } from '../lib/format';
 
-interface LocState {
-  email?: string;
-  token?: string;
-}
-
 export default function MyReservation() {
   const { state } = useLocation();
-  const initial = state as LocState | null;
+  // email i token mogu da dodju sa strane potvrde
+  const initial = state as any;
 
   const [email, setEmail] = useState(initial?.email ?? '');
   const [token, setToken] = useState(initial?.token ?? '');
@@ -35,9 +30,10 @@ export default function MyReservation() {
   const [editTickets, setEditTickets] = useState<number | null>(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
 
+  // ako smo dosli sa strane potvrde, odmah ucitaj rezervaciju
   useEffect(() => {
-    if (initial?.email && initial.token) {
-      void handleFind(initial.email, initial.token);
+    if (initial?.email && initial?.token) {
+      handleFind(initial.email, initial.token);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -55,7 +51,9 @@ export default function MyReservation() {
     setReservation(null);
     setConfirmCancel(false);
     try {
-      const [r, c] = await Promise.all([getReservation(eMail, tkn), getConcert()]);
+      // ucitavamo rezervaciju pa koncert, jedno po jedno
+      const r = await getReservation(eMail, tkn);
+      const c = await getConcert();
       setReservation(r);
       setConcert(c);
       setEditTickets(r.ticketCount);
@@ -67,11 +65,13 @@ export default function MyReservation() {
   };
 
   const zone = concert?.zones.find((z) => z.id === reservation?.zoneId);
-  const maxTickets = (() => {
-    if (!zone || !reservation) return 50;
+
+  // maksimalan broj karata u zoni uzimajuci u obzir ovu rezervaciju
+  let maxTickets = 50;
+  if (zone && reservation) {
     const othersOccupied = (zone.capacity - zone.availableSeats) - reservation.ticketCount;
-    return Math.min(50, zone.capacity - othersOccupied);
-  })();
+    maxTickets = Math.min(50, zone.capacity - othersOccupied);
+  }
 
   const handleUpdate = async () => {
     if (!reservation || editTickets == null) return;
@@ -130,22 +130,29 @@ export default function MyReservation() {
         className="panel"
         onSubmit={(e) => {
           e.preventDefault();
-          void handleFind();
+          handleFind();
         }}
       >
         <div className="form__grid">
-          <Field
-            label="Email" required type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="marko@example.com"
-          />
-          <Field
-            label="Token" required
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder="32-karakterni token"
-          />
+          <div className="form__field">
+            <label className="form__label">Email <span>*</span></label>
+            <input
+              className="form__input"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="marko@example.com"
+            />
+          </div>
+          <div className="form__field">
+            <label className="form__label">Token <span>*</span></label>
+            <input
+              className="form__input"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              placeholder="32-karakterni token"
+            />
+          </div>
         </div>
         <div className="row" style={{ marginTop: 14 }}>
           <button type="submit" className="btn btn--primary" disabled={loading}>

@@ -1,95 +1,72 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getConcert, createReservation } from '../api/endpoints';
 import { extractErrorMessage } from '../api/client';
-import type { ConcertInfo, ZoneInfo } from '../api/types';
+import type { ConcertInfo } from '../api/types';
 import { formatRsd } from '../lib/format';
 import { calculatePricing } from '../lib/pricing';
-import { Field } from '../components/Field';
 import TicketCounter from '../components/TicketCounter';
 import Alert from '../components/Alert';
-
-interface LocationState {
-  zoneId?: number;
-}
-
-interface FormState {
-  zoneId: number | '';
-  ticketCount: number;
-  firstName: string;
-  lastName: string;
-  company: string;
-  address1: string;
-  address2: string;
-  postalCode: string;
-  city: string;
-  country: string;
-  email: string;
-  promoCode: string;
-}
-
-const EMPTY: FormState = {
-  zoneId: '',
-  ticketCount: 1,
-  firstName: '',
-  lastName: '',
-  company: '',
-  address1: '',
-  address2: '',
-  postalCode: '',
-  city: '',
-  country: 'Srbija',
-  email: '',
-  promoCode: '',
-};
 
 export default function Book() {
   const navigate = useNavigate();
   const location = useLocation();
-  const preselected = (location.state as LocationState | null)?.zoneId;
+  // zona koju je korisnik kliknuo na pocetnoj strani (moze da ne postoji)
+  const preselected = (location.state as any)?.zoneId;
 
   const [concert, setConcert] = useState<ConcertInfo | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [form, setForm] = useState<FormState>(EMPTY);
+  // jedno useState za svako polje forme
+  const [zoneId, setZoneId] = useState<number | ''>('');
+  const [ticketCount, setTicketCount] = useState(1);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [company, setCompany] = useState('');
+  const [address1, setAddress1] = useState('');
+  const [address2, setAddress2] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [city, setCity] = useState('');
+  const [country, setCountry] = useState('Srbija');
+  const [email, setEmail] = useState('');
+  const [promoCode, setPromoCode] = useState('');
+
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  // ucitaj koncert kad se stranica otvori
   useEffect(() => {
-    let cancelled = false;
     getConcert()
       .then((c) => {
-        if (cancelled) return;
         setConcert(c);
+        // ako je korisnik vec izabrao zonu na pocetnoj, postavi je
         if (preselected && c.zones.some((z) => z.id === preselected)) {
-          setForm((f) => ({ ...f, zoneId: preselected }));
+          setZoneId(preselected);
         }
       })
-      .catch((e) => !cancelled && setLoadError(extractErrorMessage(e)))
-      .finally(() => !cancelled && setLoading(false));
-    return () => { cancelled = true; };
+      .catch((e) => setLoadError(extractErrorMessage(e)))
+      .finally(() => setLoading(false));
   }, [preselected]);
 
-  const selectedZone: ZoneInfo | undefined = useMemo(() => {
-    if (form.zoneId === '' || !concert) return undefined;
-    return concert.zones.find((z) => z.id === form.zoneId);
-  }, [form.zoneId, concert]);
+  // izabrana zona - racunamo direktno u renderu
+  const selectedZone =
+    zoneId === '' || !concert
+      ? undefined
+      : concert.zones.find((z) => z.id === zoneId);
 
   const maxTickets = selectedZone ? Math.min(50, selectedZone.availableSeats) : 1;
 
-  const pricing = useMemo(() => {
-    if (!selectedZone || !concert) return null;
-    return calculatePricing(
+  // cena se racuna direktno u renderu (bez useMemo)
+  let pricing = null;
+  if (selectedZone && concert) {
+    pricing = calculatePricing(
       selectedZone.pricePerTicket,
-      form.ticketCount,
+      ticketCount,
       concert.isEarlyBirdActive,
-      form.promoCode.trim().length > 0,
+      promoCode.trim().length > 0,
     );
-  }, [selectedZone, concert, form.ticketCount, form.promoCode]);
-
-  const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
-    setForm((f) => ({ ...f, [key]: value }));
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,19 +79,20 @@ export default function Book() {
     try {
       const result = await createReservation({
         zoneId: selectedZone.id,
-        ticketCount: form.ticketCount,
-        firstName: form.firstName.trim(),
-        lastName: form.lastName.trim(),
-        company: form.company.trim() || null,
-        address1: form.address1.trim(),
-        address2: form.address2.trim() || null,
-        postalCode: form.postalCode.trim(),
-        city: form.city.trim(),
-        country: form.country.trim(),
-        email: form.email.trim(),
-        promoCode: form.promoCode.trim() || null,
+        ticketCount: ticketCount,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        company: company.trim() || null,
+        address1: address1.trim(),
+        address2: address2.trim() || null,
+        postalCode: postalCode.trim(),
+        city: city.trim(),
+        country: country.trim(),
+        email: email.trim(),
+        promoCode: promoCode.trim() || null,
       });
-      navigate('/confirmation', { state: { reservation: result } });
+      // prosledjujemo i pricing da bi Confirmation mogao da prikaze popuste
+      navigate('/confirmation', { state: { reservation: result, pricing } });
     } catch (err) {
       setSubmitError(extractErrorMessage(err));
     } finally {
@@ -155,9 +133,9 @@ export default function Book() {
                 <label className="form__label">Zona <span>*</span></label>
                 <select
                   className="form__select"
-                  value={form.zoneId}
+                  value={zoneId}
                   onChange={(e) =>
-                    update('zoneId', e.target.value === '' ? '' : Number(e.target.value))
+                    setZoneId(e.target.value === '' ? '' : Number(e.target.value))
                   }
                   required
                 >
@@ -178,8 +156,8 @@ export default function Book() {
               <div className="form__field">
                 <label className="form__label">Broj karata <span>*</span></label>
                 <TicketCounter
-                  value={form.ticketCount}
-                  onChange={(v) => update('ticketCount', v)}
+                  value={ticketCount}
+                  onChange={(v) => setTicketCount(v)}
                   min={1}
                   max={maxTickets}
                 />
@@ -195,65 +173,104 @@ export default function Book() {
           <div className="panel">
             <h3>Podaci kupca</h3>
             <div className="form__grid" style={{ marginTop: 16 }}>
-              <Field
-                label="Ime" required placeholder="Marko"
-                value={form.firstName}
-                onChange={(e) => update('firstName', e.target.value)}
-                maxLength={100}
-              />
-              <Field
-                label="Prezime" required placeholder="Petrović"
-                value={form.lastName}
-                onChange={(e) => update('lastName', e.target.value)}
-                maxLength={100}
-              />
-              <Field
-                label="Email" required type="email" placeholder="marko@example.com"
-                value={form.email}
-                onChange={(e) => update('email', e.target.value)}
-                full
-                maxLength={200}
-              />
-              <Field
-                label="Kompanija (opciono)" placeholder="—"
-                value={form.company}
-                onChange={(e) => update('company', e.target.value)}
-                full
-                maxLength={200}
-              />
-              <Field
-                label="Adresa" required placeholder="Knez Mihailova 1"
-                value={form.address1}
-                onChange={(e) => update('address1', e.target.value)}
-                full
-                maxLength={200}
-              />
-              <Field
-                label="Adresa (red 2)" placeholder="Stan 4"
-                value={form.address2}
-                onChange={(e) => update('address2', e.target.value)}
-                full
-                maxLength={200}
-              />
-              <Field
-                label="Poštanski broj" required placeholder="11000"
-                value={form.postalCode}
-                onChange={(e) => update('postalCode', e.target.value)}
-                maxLength={20}
-              />
-              <Field
-                label="Grad" required placeholder="Beograd"
-                value={form.city}
-                onChange={(e) => update('city', e.target.value)}
-                maxLength={100}
-              />
-              <Field
-                label="Država" required
-                value={form.country}
-                onChange={(e) => update('country', e.target.value)}
-                full
-                maxLength={100}
-              />
+              <div className="form__field">
+                <label className="form__label">Ime <span>*</span></label>
+                <input
+                  className="form__input"
+                  placeholder="Marko"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  maxLength={100}
+                />
+              </div>
+
+              <div className="form__field">
+                <label className="form__label">Prezime <span>*</span></label>
+                <input
+                  className="form__input"
+                  placeholder="Petrović"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  maxLength={100}
+                />
+              </div>
+
+              <div className="form__field form__field--full">
+                <label className="form__label">Email <span>*</span></label>
+                <input
+                  className="form__input"
+                  type="email"
+                  placeholder="marko@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  maxLength={200}
+                />
+              </div>
+
+              <div className="form__field form__field--full">
+                <label className="form__label">Kompanija (opciono)</label>
+                <input
+                  className="form__input"
+                  placeholder="—"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  maxLength={200}
+                />
+              </div>
+
+              <div className="form__field form__field--full">
+                <label className="form__label">Adresa <span>*</span></label>
+                <input
+                  className="form__input"
+                  placeholder="Knez Mihailova 1"
+                  value={address1}
+                  onChange={(e) => setAddress1(e.target.value)}
+                  maxLength={200}
+                />
+              </div>
+
+              <div className="form__field form__field--full">
+                <label className="form__label">Adresa (red 2)</label>
+                <input
+                  className="form__input"
+                  placeholder="Stan 4"
+                  value={address2}
+                  onChange={(e) => setAddress2(e.target.value)}
+                  maxLength={200}
+                />
+              </div>
+
+              <div className="form__field">
+                <label className="form__label">Poštanski broj <span>*</span></label>
+                <input
+                  className="form__input"
+                  placeholder="11000"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  maxLength={20}
+                />
+              </div>
+
+              <div className="form__field">
+                <label className="form__label">Grad <span>*</span></label>
+                <input
+                  className="form__input"
+                  placeholder="Beograd"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  maxLength={100}
+                />
+              </div>
+
+              <div className="form__field form__field--full">
+                <label className="form__label">Država <span>*</span></label>
+                <input
+                  className="form__input"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  maxLength={100}
+                />
+              </div>
             </div>
           </div>
 
@@ -266,8 +283,8 @@ export default function Book() {
               <input
                 className="form__input mono"
                 placeholder="npr. AB12CD34"
-                value={form.promoCode}
-                onChange={(e) => update('promoCode', e.target.value.toUpperCase())}
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                 maxLength={16}
               />
             </div>
@@ -294,7 +311,7 @@ export default function Book() {
                 </div>
                 <div className="summary__row">
                   <span className="summary__label">Broj karata</span>
-                  <span className="summary__value">{form.ticketCount}</span>
+                  <span className="summary__value">{ticketCount}</span>
                 </div>
 
                 {pricing && (
