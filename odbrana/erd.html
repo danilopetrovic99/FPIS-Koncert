@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <title>Chen ER Dijagram – KoncertApp</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 30px 40px; background: #fff; color: #1a1a2e; }
+    h1 { font-size: 1.7rem; color: #0f3460; border-bottom: 3px solid #0f3460; padding-bottom: 10px; margin-bottom: 12px; }
+    p  { color: #444; margin-bottom: 14px; font-size: 0.95rem; line-height: 1.6; }
+    .wrap { overflow-x: auto; border: 1px solid #dce3f0; border-radius: 8px; background: #fafbfd; }
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 22px; align-items: center;
+      margin-top: 16px; padding: 12px 20px;
+      background: #f4f6fb; border: 1px solid #d0d8e8; border-radius: 8px; font-size: 0.87rem;
+    }
+    .li { display: flex; align-items: center; gap: 8px; }
+  </style>
+</head>
+<body>
+
+<h1>Chen ER Dijagram – KoncertApp</h1>
+<p>
+  Klasična Chen notacija:
+  <strong>pravougaonik</strong> = entitet &nbsp;·&nbsp;
+  <strong>oval</strong> = atribut (narandžasti = PK — podvučen, zeleni = UK) &nbsp;·&nbsp;
+  <strong>romboid</strong> = veza &nbsp;·&nbsp;
+  brojevi uz linije = kardinalnost.
+  Strani ključevi se ne prikazuju kao atributi — implicirani su vezama.
+</p>
+
+<div class="wrap">
+  <svg id="er" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div class="legend">
+  <div class="li">
+    <svg width="50" height="26"><rect x="1" y="1" width="48" height="24" fill="#dbe9f7" stroke="#0f3460" stroke-width="2.5"/><text x="25" y="13" text-anchor="middle" dominant-baseline="middle" font-family="Segoe UI" font-size="10" fill="#0f3460" font-weight="bold">Entitet</text></svg>
+    Entitet
+  </div>
+  <div class="li">
+    <svg width="64" height="26"><ellipse cx="32" cy="13" rx="31" ry="12" fill="#fff" stroke="#0f3460" stroke-width="1.5"/><text x="32" y="13" text-anchor="middle" dominant-baseline="middle" font-family="Segoe UI" font-size="10" fill="#1a1a2e">Atribut</text></svg>
+    Atribut
+  </div>
+  <div class="li">
+    <svg width="64" height="26"><ellipse cx="32" cy="13" rx="31" ry="12" fill="#fde8d8" stroke="#c0440c" stroke-width="2"/><text x="32" y="13" text-anchor="middle" dominant-baseline="middle" font-family="Segoe UI" font-size="10" fill="#7a2200" font-weight="bold" text-decoration="underline">Id</text></svg>
+    PK atribut (podvučen)
+  </div>
+  <div class="li">
+    <svg width="64" height="26"><ellipse cx="32" cy="13" rx="31" ry="12" fill="#d8fdea" stroke="#0c6c3c" stroke-width="2"/><text x="32" y="13" text-anchor="middle" dominant-baseline="middle" font-family="Segoe UI" font-size="10" fill="#0c4a2a" font-weight="bold">Token</text></svg>
+    UK atribut
+  </div>
+  <div class="li">
+    <svg width="42" height="30"><polygon points="21,1 41,15 21,29 1,15" fill="#fff8e1" stroke="#e6a817" stroke-width="2"/></svg>
+    Veza (romboid)
+  </div>
+</div>
+
+<script>
+(function () {
+  const NS = 'http://www.w3.org/2000/svg';
+
+  // ── canvas ──────────────────────────────────────────────────────
+  const W = 2820, H = 1460;
+
+  // ── entity config ───────────────────────────────────────────────
+  //  x,y = center;  w = rect width;  h = rect height
+  //  attrs: label (string or [line1,line2]), pk?, uk?,
+  //         dx/dy = offset from entity center,
+  //         rx (default 63), ry (default 22 or 29 for 2-line)
+  const ENTITIES = [
+    {
+      id: 'Concert', x: 340, y: 720, w: 158, h: 56,
+      attrs: [
+        { label: 'Id',                    pk:true,  dx:-205, dy:-245 },
+        { label: 'Name',                            dx:   0, dy:-272 },
+        { label: 'City',                            dx: 205, dy:-245 },
+        { label: 'Location',                        dx: 250, dy:-112 },
+        { label: ['Concert','Dates'],               dx:-245, dy:-112, rx:62 },
+        { label: ['Additional','Info'],             dx:-220, dy: 165, rx:62 },
+        { label: ['EarlyBird','Deadline'],          dx:  20, dy: 268, rx:67 },
+      ],
+    },
+    {
+      id: 'Zone', x: 1010, y: 720, w: 118, h: 56,
+      attrs: [
+        { label: 'Id',               pk:true,  dx:-145, dy:-215 },
+        { label: 'Name',                        dx:  60, dy:-228 },
+        { label: 'Capacity',                    dx: 195, dy:-178 },
+        { label: ['Price','PerTicket'],         dx:  30, dy: 232, rx:60 },
+      ],
+    },
+    {
+      id: 'Reservation', x: 1710, y: 720, w: 188, h: 56,
+      attrs: [
+        { label: 'Id',             pk:true,  dx:-345, dy:-232 },
+        { label: 'Status',                   dx:-205, dy:-268 },
+        { label: 'Token',          uk:true,  dx: -68, dy:-288 },
+        { label: ['Ticket','Count'],         dx:  68, dy:-288, rx:57 },
+        { label: ['Total','Price'],          dx: 205, dy:-268, rx:55 },
+        { label: ['IsEarly','Bird'],         dx: 345, dy:-232, rx:60 },
+        { label: 'CreatedAt',                dx: 285, dy: -88 },
+        { label: 'FirstName',                dx: 285, dy:  88 },
+        { label: 'LastName',                 dx: 245, dy: 232 },
+        { label: 'Company',                  dx: 205, dy: 268 },
+        { label: 'Email',                    dx:  68, dy: 288 },
+        { label: 'Address1',                 dx: -68, dy: 288 },
+        { label: 'Address2',                 dx:-205, dy: 268 },
+        { label: ['Postal','Code'],          dx:-245, dy: 232, rx:57 },
+        { label: 'City',                     dx:-285, dy:  88 },
+        { label: 'Country',                  dx:-285, dy: -88 },
+      ],
+    },
+    {
+      id: 'PromoCode', x: 2510, y: 720, w: 172, h: 56,
+      attrs: [
+        { label: 'Id',      pk:true,  dx:-162, dy:-212 },
+        { label: 'Code',    uk:true,  dx:  32, dy:-228 },
+        { label: 'Status',            dx: 188, dy:-188 },
+      ],
+    },
+  ];
+
+  // ── relationship config ─────────────────────────────────────────
+  //  x,y = diamond center
+  //  e1/e2 = entity ids;  c1/c2 = cardinality labels
+  const RELS = [
+    { label:'sadrži',   x: 675, y: 720, e1:'Concert',     e2:'Zone',        c1:'1',    c2:'1..*' },
+    { label:'prima',    x:1360, y: 720, e1:'Zone',         e2:'Reservation', c1:'1',    c2:'0..*' },
+    { label:'generiše', x:2130, y: 598, e1:'Reservation',  e2:'PromoCode',   c1:'1',    c2:'1'    },
+    { label:'koristi',  x:2130, y: 842, e1:'Reservation',  e2:'PromoCode',   c1:'0..1', c2:'0..1' },
+  ];
+
+  // ── helpers ─────────────────────────────────────────────────────
+  const entMap = {};
+  ENTITIES.forEach(e => entMap[e.id] = e);
+
+  function el(tag, attrs) {
+    const n = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+    return n;
+  }
+
+  function mkText(parent, x, y, lines, { size=12, fill='#1a1a2e', bold=false, underline=false } = {}) {
+    if (!Array.isArray(lines)) lines = [lines];
+    const lh = size * 1.35;
+    const startY = lines.length === 1 ? y : y - (lh * (lines.length - 1)) / 2;
+    const t = el('text', {
+      x, 'text-anchor':'middle',
+      'font-family':'Segoe UI,Arial,sans-serif',
+      'font-size': size,
+      fill,
+      'font-weight': bold ? 'bold' : 'normal',
+    });
+    lines.forEach((line, i) => {
+      const ts = document.createElementNS(NS, 'tspan');
+      ts.setAttribute('x', x);
+      ts.setAttribute('y', startY + i * lh);
+      if (underline && i === 0) ts.setAttribute('text-decoration', 'underline');
+      ts.textContent = line;
+      t.appendChild(ts);
+    });
+    parent.appendChild(t);
+  }
+
+  function lerp(a, b, t) { return a + t * (b - a); }
+
+  // ── build SVG ───────────────────────────────────────────────────
+  const svg = document.getElementById('er');
+  svg.setAttribute('width',   W);
+  svg.setAttribute('height',  H);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  // Layer order: lines first (bottom), then diamonds + entities on top, text last
+  const gAttrLines = el('g', {});   // attr–entity lines
+  const gRelLines  = el('g', {});   // entity–diamond lines
+  const gDiamonds  = el('g', {});   // relationship diamonds
+  const gEntities  = el('g', {});   // entity rectangles (over lines)
+  const gEllipses  = el('g', {});   // attribute ellipses
+  const gLabels    = el('g', {});   // all text
+
+  [gAttrLines, gRelLines, gDiamonds, gEntities, gEllipses, gLabels]
+    .forEach(g => svg.appendChild(g));
+
+  // ── 1. attribute lines ──────────────────────────────────────────
+  ENTITIES.forEach(ent => {
+    ent.attrs.forEach(a => {
+      gAttrLines.appendChild(el('line', {
+        x1: ent.x, y1: ent.y,
+        x2: ent.x + a.dx, y2: ent.y + a.dy,
+        stroke: '#0f3460', 'stroke-width': 1.4,
+      }));
+    });
+  });
+
+  // ── 2. relationship lines ───────────────────────────────────────
+  RELS.forEach(r => {
+    const e1 = entMap[r.e1], e2 = entMap[r.e2];
+    gRelLines.appendChild(el('line', {
+      x1: e1.x, y1: e1.y, x2: r.x, y2: r.y,
+      stroke: '#0f3460', 'stroke-width': 1.9,
+    }));
+    gRelLines.appendChild(el('line', {
+      x1: r.x, y1: r.y, x2: e2.x, y2: e2.y,
+      stroke: '#0f3460', 'stroke-width': 1.9,
+    }));
+  });
+
+  // ── 3. relationship diamonds ────────────────────────────────────
+  const RHW = 57, RHH = 32; // half-width / half-height
+  RELS.forEach(r => {
+    const pts = `${r.x},${r.y-RHH} ${r.x+RHW},${r.y} ${r.x},${r.y+RHH} ${r.x-RHW},${r.y}`;
+    gDiamonds.appendChild(el('polygon', {
+      points: pts,
+      fill: '#fff8e1', stroke: '#e6a817', 'stroke-width': 2,
+    }));
+    mkText(gLabels, r.x, r.y, r.label, { size: 12, fill: '#5a4000' });
+  });
+
+  // ── 4. entity rectangles (drawn OVER lines so lines "terminate" at border) ──
+  ENTITIES.forEach(ent => {
+    gEntities.appendChild(el('rect', {
+      x: ent.x - ent.w/2, y: ent.y - ent.h/2,
+      width: ent.w, height: ent.h,
+      fill: '#dbe9f7', stroke: '#0f3460', 'stroke-width': 2.6,
+    }));
+    mkText(gLabels, ent.x, ent.y, ent.id, { size: 15, fill: '#0f3460', bold: true });
+  });
+
+  // ── 5. attribute ellipses ────────────────────────────────────────
+  ENTITIES.forEach(ent => {
+    ent.attrs.forEach(a => {
+      const ax = ent.x + a.dx, ay = ent.y + a.dy;
+      const twoLine = Array.isArray(a.label);
+      const rx = a.rx ?? 63;
+      const ry = twoLine ? 29 : 22;
+
+      const fill   = a.pk ? '#fde8d8' : a.uk ? '#d8fdea' : '#ffffff';
+      const stroke = a.pk ? '#c0440c' : a.uk ? '#0c6c3c' : '#0f3460';
+      const sw     = (a.pk || a.uk) ? 2 : 1.5;
+
+      gEllipses.appendChild(el('ellipse', {
+        cx: ax, cy: ay, rx, ry, fill, stroke, 'stroke-width': sw,
+      }));
+
+      mkText(gLabels, ax, ay, a.label, {
+        size:      12,
+        fill:      a.pk ? '#7a2200' : a.uk ? '#0c4a2a' : '#1a1a2e',
+        bold:      !!(a.pk || a.uk),
+        underline: !!a.pk,
+      });
+    });
+  });
+
+  // ── 6. cardinality labels ────────────────────────────────────────
+  // Place at t=0.27 from each entity toward the diamond, offset ±15px perpendicular
+  RELS.forEach(r => {
+    const e1 = entMap[r.e1], e2 = entMap[r.e2];
+    const T = 0.27;
+
+    // perpendicular offset: rotate (dx,dy) by 90°, normalize, scale by 15
+    function perpOff(x1, y1, x2, y2) {
+      const dx = x2 - x1, dy = y2 - y1;
+      const len = Math.hypot(dx, dy) || 1;
+      return { ox: -dy/len * 15, oy: dx/len * 15 };
+    }
+
+    // c1: from e1 toward rel diamond
+    const c1x = lerp(e1.x, r.x, T);
+    const c1y = lerp(e1.y, r.y, T);
+    const p1  = perpOff(e1.x, e1.y, r.x, r.y);
+    mkText(gLabels, c1x + p1.ox, c1y + p1.oy, r.c1, { size: 13, fill: '#c0440c', bold: true });
+
+    // c2: from e2 toward rel diamond
+    const c2x = lerp(e2.x, r.x, T);
+    const c2y = lerp(e2.y, r.y, T);
+    const p2  = perpOff(e2.x, e2.y, r.x, r.y);
+    mkText(gLabels, c2x + p2.ox, c2y + p2.oy, r.c2, { size: 13, fill: '#c0440c', bold: true });
+  });
+
+})();
+</script>
+</body>
+</html>
